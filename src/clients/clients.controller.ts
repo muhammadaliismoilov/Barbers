@@ -39,11 +39,7 @@ export class ClientsController {
   findOne(@Param('id') id: string) {
     return this.clientService.findOne(id);
   }
-  @Get("salom")
-  async full (){
-    return "sasas"
-  }
-
+ 
   @Patch(':id')
   @ApiOperation({ summary: 'Mijoz ma’lumotlarini yangilash' })
   @ApiResponse({ status: 200, description: 'Mijoz muvaffaqiyatli yangilandi'})
