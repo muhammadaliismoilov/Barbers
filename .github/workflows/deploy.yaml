@@ -23,11 +23,14 @@ jobs:
           script: |
             set -e
             cd /home/ubuntu
+
             # eski papkani o‘chirib tashlaymiz
             rm -rf barbers
+
             # yangi kodni olib kelamiz
             git clone https://github.com/muhammadaliismoilov/Barbers.git barbers
             cd barbers
+
             # .env faylni yaratamiz
             echo "PORT=${{ secrets.PORT }}" > .env
             echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
@@ -35,10 +38,13 @@ jobs:
             echo "DB_USER=${{ secrets.DB_USER }}" >> .env
             echo "DB_PASS=${{ secrets.DB_PASS }}" >> .env
             echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+
             # dependency o‘rnatamiz
             npm install
+
             # build qilamiz
             npm run build
+
             # eski processni o‘chirib, yangisini ishga tushiramiz
             pm2 delete barbers || true
             pm2 start dist/main.js --name barbers
