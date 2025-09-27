@@ -26,7 +26,7 @@ jobs:
             # eski papkani o'chirib tashlaymiz
             rm -rf barbers
             # yangi kodni olib kelamiz
-            git clone https://github.com/muhammadaliismoilov/barbers.git
+            git clone https://github.com/muhammadaliismoilov/Barbers.git barbers
             cd barbers
             # .env faylni yaratamiz
             echo "PORT=${{ secrets.PORT }}" > .env
