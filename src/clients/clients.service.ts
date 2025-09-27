@@ -67,7 +67,8 @@ export class ClientsService {
 
   async findAll() {
   try {
-    return await this.clientRepo.find({
+    return await this.clientRepo.find({ 
+      
     });
   } catch (error) {
     throw new InternalServerErrorException(
