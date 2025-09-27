@@ -12,7 +12,7 @@ export class User {
   id: string;
 
   @Column()
-  full_name: string;
+  fullName: string;
 
   @Column({ unique: true })
   phone: string;

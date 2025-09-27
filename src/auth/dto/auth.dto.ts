@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  IsEnum,
   IsNotEmpty,
   IsPhoneNumber,
   IsString,
@@ -15,7 +14,7 @@ export class RegisterDto {
   })
   @IsString()
   @IsNotEmpty()
-  fullname: string;
+  fullName: string;
 
   @ApiProperty({
     example: '+998901234567',

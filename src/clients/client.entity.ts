@@ -29,7 +29,8 @@ export class Client {
   phone: string;
   @Column()
   barberServiceId: string;
-  @ManyToOne(() => BarberService, (service) => service.id, { eager: true })
+  
+  @ManyToOne(() => BarberService, (service) => service.id,)
   @JoinColumn({ name: 'barberServiceId' })
   barberService: BarberService;
 

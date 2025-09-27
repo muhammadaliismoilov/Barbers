@@ -28,7 +28,7 @@ export class ClientsService {
 
       if (!barberService)
         throw new NotFoundException(
-          `Barber service topilmadi (id: ${dto.barberServiceId})`,
+          `Xizmat turi topilmadi (id: ${dto.barberServiceId})`,
         );
 
       // 🔎 Sana + vaqt bo‘yicha mavjudligini tekshirish
@@ -36,9 +36,7 @@ export class ClientsService {
         where: {
           appointmentDate: dto.appointmentDate,
           appointmentTime: dto.appointmentTime,
-          barberService: { id: barberService.id },
         },
-        relations: ['barberService'],
       });
 
       if (exists) {
@@ -70,8 +68,6 @@ export class ClientsService {
   async findAll() {
   try {
     return await this.clientRepo.find({
-      relations: ['barberService'], // ✅ har doim xizmatni ham qaytarsin
-      order: { createdAt: 'DESC' },
     });
   } catch (error) {
     throw new InternalServerErrorException(
