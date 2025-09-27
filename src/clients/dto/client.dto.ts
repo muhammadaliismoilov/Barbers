@@ -1,0 +1,118 @@
+import { ApiProperty, PartialType } from '@nestjs/swagger';
+import {
+  IsNotEmpty,
+  IsString,
+  IsPhoneNumber,
+  IsUUID,
+  IsDateString,
+  Matches,
+  IsOptional,
+} from 'class-validator';
+
+export class CreateClientDto {
+  @ApiProperty({ example: 'Ali Valiyev', description: 'Mijozning to‘liq ismi' })
+  @IsNotEmpty({ message: 'Ism bo‘sh bo‘lishi mumkin emas' })
+  @IsString({ message: 'Ism faqat matn bo‘lishi kerak' })
+  name: string;
+
+  @ApiProperty({
+    example: '+998901234567',
+    description: 'Mijozning telefon raqami',
+  })
+  @IsNotEmpty({ message: 'Telefon raqami kiritilishi kerak' })
+  @IsPhoneNumber('UZ', { message: 'Telefon raqami noto‘g‘ri formatda' })
+  phone: string;
+
+  @ApiProperty({
+    example: '8f0e1c3a-9c2b-4d8f-bac0-15e29a6c6f2b',
+    description: 'Barber xizmati ID (UUID)',
+  })
+  @IsNotEmpty({ message: 'Barber xizmati ID kiritilishi kerak' })
+  @IsUUID('4', { message: 'Barber xizmati ID noto‘g‘ri formatda' })
+  barberServiceId: string;
+
+  @ApiProperty({
+    example: '2025-09-28',
+    description: 'Tayinlangan sana (YYYY-MM-DD)',
+  })
+  @IsNotEmpty({ message: 'Tayinlangan sana bo‘sh bo‘lishi mumkin emas' })
+  @IsDateString({}, { message: 'Sana noto‘g‘ri formatda (YYYY-MM-DD)' })
+  appointmentDate: string;
+
+  @ApiProperty({
+    example: '14:30',
+    description: 'Tayinlangan vaqt (HH:mm formatida)',
+  })
+  @IsNotEmpty({ message: 'Tayinlangan vaqt kiritilishi kerak' })
+  @Matches(/^([0-1]\d|2[0-3]):([0-5]\d)$/, {
+    message: 'Vaqt noto‘g‘ri formatda (HH:mm)',
+  })
+  appointmentTime: string;
+
+  @ApiProperty({
+    example: 'Soqol olish xizmati uchun',
+    description: 'Qo‘shimcha izoh',
+    required: false,
+  })
+  @IsOptional()
+  @IsString({ message: 'Izoh faqat matn bo‘lishi kerak' })
+  description?: string;
+}
+
+export class UpdateClientDto {
+  @ApiProperty({
+    example: 'Ali Valiyev',
+    description: 'Mijozning to‘liq ismi',
+    required: false,
+  })
+  @IsOptional()
+  @IsString({ message: 'Ism faqat matn bo‘lishi kerak' })
+  name?: string;
+
+  @ApiProperty({
+    example: '+998901234567',
+    description: 'Mijozning telefon raqami',
+    required: false,
+  })
+  @IsOptional()
+  @IsPhoneNumber('UZ', { message: 'Telefon raqami noto‘g‘ri formatda' })
+  phone?: string;
+
+  @ApiProperty({
+    example: '8f0e1c3a-9c2b-4d8f-bac0-15e29a6c6f2b',
+    description: 'Barber xizmati ID (UUID)',
+    required: false,
+  })
+  @IsOptional()
+  @IsUUID('4', { message: 'Barber xizmati ID noto‘g‘ri formatda' })
+  barberService?: string;
+
+  @ApiProperty({
+    example: '2025-09-28',
+    description: 'Tayinlangan sana (YYYY-MM-DD)',
+    required: false,
+  })
+  @IsOptional()
+  @IsDateString({}, { message: 'Sana noto‘g‘ri formatda (YYYY-MM-DD)' })
+  appointmentDate?: string;
+
+  @ApiProperty({
+    example: '14:30',
+    description: 'Tayinlangan vaqt (HH:mm formatida)',
+    required: false,
+  })
+  @IsOptional()
+  @Matches(/^([0-1]\d|2[0-3]):([0-5]\d)$/, {
+    message: 'Vaqt noto‘g‘ri formatda (HH:mm)',
+  })
+  appointmentTime?: string;
+
+  @ApiProperty({
+    example: 'Soqol olish xizmati uchun',
+    description: 'Qo‘shimcha izoh',
+    required: false,
+  })
+  @IsOptional()
+  @IsString({ message: 'Izoh faqat matn bo‘lishi kerak' })
+  decription?: string;
+}
