@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsEnum,
   IsNotEmpty,
+  IsOptional,
   IsPhoneNumber,
   IsString,
   MinLength,
@@ -35,18 +37,23 @@ export class RegisterDto {
 
 
 export class LoginDto {
-  @ApiProperty({
-    example: '+998901234567',
-    description: 'Foydalanuvchining telefon raqami',
-  })
-  @IsPhoneNumber('UZ')
+  @ApiProperty({ example: '+998901234567', description: 'Telefon raqami' })
+  @IsPhoneNumber('UZ', { message: 'Telefon raqami noto‘g‘ri formatda' })
   phone: string;
 
-  @ApiProperty({
-    example: 'password123',
-    description: 'Foydalanuvchining paroli',
-  })
+  @ApiProperty({ example: 'password123', description: 'Parol' })
   @IsString()
-  @IsNotEmpty()
+  @MinLength(6, { message: 'Parol kamida 6 ta belgidan iborat bo‘lishi kerak' })
   password: string;
+
+  @ApiProperty({
+    example: Role.USER,
+    enum: Role,
+    required: false,
+    description: 'Role (admin, user, barber) tanlash ixtiyoriy',
+  })
+  @IsOptional()
+  @IsEnum(Role, { message: 'Role faqat admin | user | barber bo‘lishi mumkin' })
+  role?: Role;
 }
+

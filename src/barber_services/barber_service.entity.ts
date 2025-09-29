@@ -7,22 +7,23 @@ import {
   UpdateDateColumn,
   JoinColumn,
 } from 'typeorm';
-import { User } from '../users/user.entity';
+import { Barber } from 'src/barbers/barber.entity';
 
 @Entity('barber_services')
 export class BarberService {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => User, (user) => user.id, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'user_id ' })
-  barber: User; // qaysi sartaroshga tegishli xizmat
+  // Ko‘p xizmat -> bitta barber
+  @ManyToOne(() => Barber, (barber) => barber.servicesList, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'barber_id' })
+  barber: Barber;
 
-  @Column({ type: 'varchar', length: 100, nullable:false })
+  @Column({ type: 'varchar', length: 100, nullable: false })
   title: string; // xizmat nomi (masalan: "Soch olish")
 
   @Column()
-  price: number; // narxi (masalan: 50000.00)
+  price: number; // narxi (masalan: 50000)
 
   @Column({ type: 'int' })
   duration: number; // qancha vaqt davom etadi (minutlarda)

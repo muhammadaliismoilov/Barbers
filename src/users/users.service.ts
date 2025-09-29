@@ -1,30 +1,80 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { CreateUserDto } from './dto/user.dto';
-
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from './user.entity';
+import { UpdateUserDto } from './dto/user.dto';
 
 @Injectable()
 export class UsersService {
-  create(createUserDto: CreateUserDto) {
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
+  ) {}
+
+  async findAll(){
     try {
-      
+      return await this.userRepo.find({
+        relations: ['barber'], // barber bilan join qilinadi
+      });
     } catch (error) {
-      throw new InternalServerErrorException
+      throw new InternalServerErrorException(
+        'Foydalanuvchilarni olishda xatolik yuz berdi',
+        error.message,
+      );
     }
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async findOne(id: string){
+    try {
+      const user = await this.userRepo.findOne({
+        where: { id },
+        relations: ['barber'],
+      });
+
+      if (!user) {
+        throw new NotFoundException(`Foydalanuvchi topilmadi (id: ${id})`);
+      }
+
+      return user;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Foydalanuvchini olishda xatolik yuz berdi',
+        error.message,
+      );
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async update(id: string, dto: UpdateUserDto) {
+    try {
+      const user = await this.userRepo.findOne({ where: { id } });
+      if (!user) {
+        throw new NotFoundException(`Foydalanuvchi topilmadi (id: ${id})`);
+      }
+
+      Object.assign(user, dto);
+      return await this.userRepo.save(user);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Foydalanuvchini yangilashda xatolik yuz berdi',
+        error.message,
+      );
+    }
   }
 
-  update(id: number) {
-    return `This action updates a #${id} user`;
-  }
+  async remove(id: string) {
+    try {
+      const user = await this.userRepo.findOne({ where: { id } });
+      if (!user) {
+        throw new NotFoundException(`Foydalanuvchi topilmadi (id: ${id})`);
+      }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+      await this.userRepo.remove(user);
+      return { message: `Foydalanuvchi muvaffaqiyatli o‘chirildi (id: ${id})` };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Foydalanuvchini o‘chirishda xatolik yuz berdi',
+        error.message,
+      );
+    }
   }
 }

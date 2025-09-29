@@ -9,6 +9,8 @@ import { BarberServicesModule } from './barber_services/barber_services.module';
 import { ReportsModule } from './reports/reports.module';
 import { ClientsModule } from './clients/clients.module';
 
+import { BarbersModule } from './barbers/barbers.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({ envFilePath: '.env', isGlobal: true }),
@@ -27,10 +29,11 @@ import { ClientsModule } from './clients/clients.module';
       }),
     }),
     AuthModule,
+    UsersModule,
+       BarbersModule,
     BarberServicesModule,
     ClientsModule,
-
-    // UsersModule,
+ 
 
     // ReportsModule,
   ],
