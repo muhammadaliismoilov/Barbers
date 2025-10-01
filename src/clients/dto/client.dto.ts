@@ -25,6 +25,14 @@ export class CreateClientDto {
 
   @ApiProperty({
     example: '8f0e1c3a-9c2b-4d8f-bac0-15e29a6c6f2b',
+    description: 'BarberID (UUID)',
+  })
+  @IsNotEmpty({ message: 'BarberID kiritilishi kerak' })
+  @IsUUID('4', { message: 'BarberID noto‘g‘ri formatda' })
+  barberId: string;
+
+  @ApiProperty({
+    example: '8f0e1c3a-9c2b-4d8f-bac0-15e29a6c6f2b',
     description: 'Barber xizmati ID (UUID)',
   })
   @IsNotEmpty({ message: 'Barber xizmati ID kiritilishi kerak' })
@@ -77,6 +85,14 @@ export class UpdateClientDto {
   @IsOptional()
   @IsPhoneNumber('UZ', { message: 'Telefon raqami noto‘g‘ri formatda' })
   phone?: string;
+
+   @ApiProperty({
+    example: '8f0e1c3a-9c2b-4d8f-bac0-15e29a6c6f2b',
+    description: 'BarberID (UUID)',
+  })
+  @IsOptional()
+  @IsUUID('4', { message: 'BarberID noto‘g‘ri formatda' })
+  barberId?: string;
 
   @ApiProperty({
     example: '8f0e1c3a-9c2b-4d8f-bac0-15e29a6c6f2b',
