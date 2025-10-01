@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
 import { Client, ClientStatus } from '../clients/client.entity';
@@ -15,7 +15,8 @@ export class ReportsService {
   ) {}
 
   async getDailyReport(date: string): Promise<ReportDto> {
-    // ✅ date format: "2025-09-25"
+  try {
+      // ✅ date format: "2025-09-25"
     const start = new Date(date);
     const end = new Date(date);
     end.setHours(23, 59, 59, 999);
@@ -23,7 +24,7 @@ export class ReportsService {
     // --- Jami mijozlar va tugallanganlar
     const clients = await this.clientRepo.find({
       where: { createdAt: Between(start, end) },
-      relations: ['barberService'], // ✅ to‘g‘risi shu
+      relations: ['barberService'], 
     });
 
     const totalClients = clients.length;
@@ -81,4 +82,8 @@ export class ReportsService {
       hoursBy,
     };
   }
+ catch (error) {
+   throw new  InternalServerErrorException('Xisobotlarni olishda serverda xatolik yuz berdi',error.message)
+  }
+}
 }
