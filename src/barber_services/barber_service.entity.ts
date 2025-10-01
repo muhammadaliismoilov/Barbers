@@ -9,13 +9,17 @@ import {
 } from 'typeorm';
 import { Barber } from 'src/barbers/barber.entity';
 
-@Entity('barber_services')
+@Entity('Barber_services')
 export class BarberService {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  // Ko‘p xizmat -> bitta barber
-  @ManyToOne(() => Barber, (barber) => barber.servicesList, { onDelete: 'CASCADE' })
+  @Column({ name: 'barber_id' })
+  barberId: string;
+  
+  @ManyToOne(() => Barber, (barber) => barber.servicesList, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'barber_id' })
   barber: Barber;
 

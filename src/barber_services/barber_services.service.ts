@@ -24,41 +24,44 @@ export class BarberServicesService {
 
   // ✅ CREATE
   async create(dto: CreateBarberServiceDto) {
-  try {
-    // Barberni tekshirish
-    const barber = await this.barberRepo.findOne({ where: { id: dto.barberId } });
-    if (!barber) throw new NotFoundException('Berilgan barber topilmadi');
+    try {
+      // Barberni tekshirish
+      const barber = await this.barberRepo.findOne({
+        where: { id: dto.barberId },
+      });
+      if (!barber) throw new NotFoundException('Berilgan barber topilmadi');
 
-    // Title uniqueness tekshirish
-    const existingService = await this.barberServiceRepo.findOne({
-      where: { title: dto.title },
-    });
-    if (existingService) throw new ConflictException('Bu xizmat mavjud!');
+      // Title uniqueness tekshirish
+      const existingService = await this.barberServiceRepo.findOne({
+        where: { title: dto.title },
+      });
+      if (existingService) throw new ConflictException('Bu xizmat mavjud!');
 
-    // Xizmat yaratish
-    const service = this.barberServiceRepo.create({
-      ...dto,
-      barber, // barber obyektini bog‘lash
-    });
+      // Xizmat yaratish
+      const service = this.barberServiceRepo.create({
+        ...dto,
+        barber: barber, // barber obyektini bog‘lash
+      });
 
-    return await this.barberServiceRepo.save(service);
-  } catch (error) {
-    if (error instanceof ConflictException || error instanceof NotFoundException) throw error;
+      return await this.barberServiceRepo.save(service);
+    } catch (error) {
+      if (
+        error instanceof ConflictException ||
+        error instanceof NotFoundException
+      )
+        throw error;
 
-    throw new InternalServerErrorException(
-      'Xizmat qo‘shishda serverda xatolik yuz berdi',
-      error.message,
-    );
+      throw new InternalServerErrorException(
+        'Xizmat qo‘shishda serverda xatolik yuz berdi',
+        error.message,
+      );
+    }
   }
-}
-
 
   // ✅ FIND ALL
   async findAll(): Promise<BarberService[]> {
     try {
-      return await this.barberServiceRepo.find({
-        relations: ['barber'],
-      });
+      return await this.barberServiceRepo.find({});
     } catch (error) {
       throw new InternalServerErrorException(
         'Xizmatlarni olishda xatolik yuz berdi',

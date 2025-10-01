@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   InternalServerErrorException,
@@ -9,6 +10,7 @@ import { BarberService } from 'src/barber_services/barber_service.entity';
 import { Repository } from 'typeorm';
 import { Client } from './client.entity';
 import { CreateClientDto, UpdateClientDto } from './dto/client.dto';
+import { Barber } from 'src/barbers/barber.entity';
 
 @Injectable()
 export class ClientsService {
@@ -17,11 +19,18 @@ export class ClientsService {
     private readonly clientRepo: Repository<Client>,
     @InjectRepository(BarberService)
     private readonly barberServiceRepo: Repository<BarberService>,
+    @InjectRepository(Barber)
+    private readonly barberRepo: Repository<Barber>,
   ) {}
 
   async create(dto: CreateClientDto) {
     try {
       // barber service mavjudligini tekshirish
+      const barber = await this.barberRepo.findOne({
+        where: { id: dto.barberId },
+      });
+      if (!barber) throw new NotFoundException('Barber topilmadi');
+
       const barberService = await this.barberServiceRepo.findOne({
         where: { id: dto.barberServiceId },
       });
@@ -29,6 +38,33 @@ export class ClientsService {
       if (!barberService)
         throw new NotFoundException(
           `Xizmat turi topilmadi (id: ${dto.barberServiceId})`,
+        );
+
+      function isValidDate(dateString: string): boolean {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return false;
+
+        const [y, m, d] = dateString.split('-').map(Number);
+        return (
+          date.getUTCFullYear() === y &&
+          date.getUTCMonth() + 1 === m &&
+          date.getUTCDate() === d
+        );
+      }
+
+      function isValidTime(timeString: string): boolean {
+        const [hh, mm] = timeString.split(':').map(Number);
+        if (isNaN(hh) || isNaN(mm)) return false;
+
+        return hh >= 0 && hh < 24 && mm >= 0 && mm < 60;
+      }
+      if (!isValidDate(dto.appointmentDate))
+        throw new BadRequestException(
+          'appointmentDate noto‘g‘ri sana kiritildi!',
+        );
+      if (!isValidTime(dto.appointmentTime))
+        throw new BadRequestException(
+          'appointmentTime noto‘g‘ri vaqt kiritildi!',
         );
 
       // 🔎 Sana + vaqt bo‘yicha mavjudligini tekshirish
@@ -52,13 +88,19 @@ export class ClientsService {
         appointmentDate: dto.appointmentDate,
         appointmentTime: dto.appointmentTime,
         description: dto.description,
-        barberServiceId: dto.barberServiceId, // ✅ endi string id ishlaydi
+        barberId: dto.barberId,
+        barberServiceId: dto.barberServiceId,
+        // barber: barber,
+        // barberService: barberService,
       });
 
       return await this.clientRepo.save(client);
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
       if (error instanceof ConflictException) throw error;
+        if (error instanceof BadRequestException) throw error;
+      console.log(error.message);
+
       throw new InternalServerErrorException(
         'Mijoz qo‘shishda serverda xatolik yuz berdi',
       );
@@ -66,86 +108,83 @@ export class ClientsService {
   }
 
   async findAll() {
-  try {
-    return await this.clientRepo.find({ 
-      
-    });
-  } catch (error) {
-    throw new InternalServerErrorException(
-      'Mijozlarni olishda serverda xatolik yuz berdi',
-    );
-  }
-}
-
-async findOne(id: string) {
-  try {
-    const client = await this.clientRepo.findOne({
-      where: { id },
-      relations: ['barberService'],
-    });
-
-    if (!client) {
-      throw new NotFoundException(`Mijoz topilmadi (id: ${id})`);
+    try {
+      return await this.clientRepo.find({});
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Mijozlarni olishda serverda xatolik yuz berdi',
+      );
     }
-
-    return client;
-  } catch (error) {
-    if (error instanceof NotFoundException) throw error;
-    throw new InternalServerErrorException(
-      'Mijozni olishda serverda xatolik yuz berdi',
-    );
   }
-}
 
-async update(id: string, dto: UpdateClientDto) {
-  try {
-    const client = await this.clientRepo.findOne({ where: { id } });
-    if (!client) {
-      throw new NotFoundException(`Mijoz topilmadi (id: ${id})`);
-    }
-
-    // Agar xizmat ID kelgan bo‘lsa tekshiramiz
-    if (dto.barberService) {
-      const barberService = await this.barberServiceRepo.findOne({
-        where: { id: dto.barberService },
+  async findOne(id: string) {
+    try {
+      const client = await this.clientRepo.findOne({
+        where: { id },
+        // relations: ['barberService', 'barber'],
       });
 
-      if (!barberService) {
-        throw new NotFoundException(
-          `Barber service topilmadi (id: ${dto.barberService})`,
-        );
+      if (!client) {
+        throw new NotFoundException(`Mijoz topilmadi (id: ${id})`);
       }
 
-      client.barberService = barberService;
+      return client;
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException(
+        'Mijozni olishda serverda xatolik yuz berdi',
+      );
     }
-
-    // qolgan fieldlarni yangilash
-    Object.assign(client, dto);
-
-    return await this.clientRepo.save(client);
-  } catch (error) {
-    if (error instanceof NotFoundException) throw error;
-    throw new InternalServerErrorException(
-      'Mijozni yangilashda serverda xatolik yuz berdi',
-    );
   }
-}
 
-async remove(id: string) {
-  try {
-    const client = await this.clientRepo.findOne({ where: { id } });
-    if (!client) {
-      throw new NotFoundException(`Mijoz topilmadi (id: ${id})`);
+  async update(id: string, dto: UpdateClientDto) {
+    try {
+      const client = await this.clientRepo.findOne({ where: { id } });
+      if (!client) {
+        throw new NotFoundException(`Mijoz topilmadi (id: ${id})`);
+      }
+
+      // Agar xizmat ID kelgan bo‘lsa tekshiramiz
+      if (dto.barberService) {
+        const barberService = await this.barberServiceRepo.findOne({
+          where: { id: dto.barberService },
+        });
+
+        if (!barberService) {
+          throw new NotFoundException(
+            `Barber service topilmadi (id: ${dto.barberService})`,
+          );
+        }
+
+        client.barberService = barberService;
+      }
+
+      // qolgan fieldlarni yangilash
+      Object.assign(client, dto);
+
+      return await this.clientRepo.save(client);
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException(
+        'Mijozni yangilashda serverda xatolik yuz berdi',
+      );
     }
-
-    await this.clientRepo.remove(client);
-    return { message: 'Mijoz muvaffaqiyatli o‘chirildi' };
-  } catch (error) {
-    if (error instanceof NotFoundException) throw error;
-    throw new InternalServerErrorException(
-      'Mijozni o‘chirishda serverda xatolik yuz berdi',
-    );
   }
-}
 
+  async remove(id: string) {
+    try {
+      const client = await this.clientRepo.findOne({ where: { id } });
+      if (!client) {
+        throw new NotFoundException(`Mijoz topilmadi (id: ${id})`);
+      }
+
+      await this.clientRepo.remove(client);
+      return { message: 'Mijoz muvaffaqiyatli o‘chirildi' };
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException(
+        'Mijozni o‘chirishda serverda xatolik yuz berdi',
+      );
+    }
+  }
 }

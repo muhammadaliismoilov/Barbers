@@ -1,4 +1,5 @@
 import { BarberService } from 'src/barber_services/barber_service.entity';
+import { Client } from 'src/clients/client.entity';
 import { Role, User } from 'src/users/user.entity';
 import {
   Entity,
@@ -44,6 +45,9 @@ export class Barber {
   // Barber -> BarberService (1 -> ko‘p)
   @OneToMany(() => BarberService, (service) => service.barber)
   servicesList: BarberService[];
+
+  @OneToMany(() => Client, (client) => client.barber)
+  clients: Client[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

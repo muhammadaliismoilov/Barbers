@@ -23,8 +23,6 @@ export class BarbersService {
       const barberFind = await this.barberRepository.findOne({
         where: { phone: dto.phone },
       });
-      console.log(barberFind);
-      
       if (barberFind)
         throw new ConflictException('Bu raqam bilan royatdan o`tilgan');
       const hashedPassword = await bcrypt.hash(dto.password, 10);
@@ -57,7 +55,7 @@ export class BarbersService {
   try {
     const barber = await this.barberRepository.findOne({
       where: { id: barberId },
-      relations: ['servicesList'], // shu yerda relationni chaqiramiz
+      relations: ['servicesList','clients'], // shu yerda relationni chaqiramiz
     });
 
     if (!barber) throw new NotFoundException('Berilgan barber topilmadi');
@@ -65,7 +63,8 @@ export class BarbersService {
     return barber;
   } catch (error) {
     if (error instanceof NotFoundException) throw error;
-
+    console.log(error.message);
+    
     throw new InternalServerErrorException(
       'Barberni olishda serverda xatolik yuz berdi',
       error.message,
