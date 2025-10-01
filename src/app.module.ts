@@ -34,9 +34,7 @@ import { BarbersModule } from './barbers/barbers.module';
        BarbersModule,
     BarberServicesModule,
     ClientsModule,
- 
-
-    // ReportsModule,
+    ReportsModule,
   ],
   controllers: [],
   providers: [],
