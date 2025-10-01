@@ -13,7 +13,7 @@ import {
 
 export enum ClientStatus {
   PENDING = 'pending',
-  IN_PROGRESS = 'in_progress',
+  PROGRESS = 'progress',
   COMPLETED = 'completed',
 }
 

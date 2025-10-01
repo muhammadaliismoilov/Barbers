@@ -11,6 +11,7 @@ import { ClientsModule } from './clients/clients.module';
 
 import { BarbersModule } from './barbers/barbers.module';
 
+
 @Module({
   imports: [
     ConfigModule.forRoot({ envFilePath: '.env', isGlobal: true }),

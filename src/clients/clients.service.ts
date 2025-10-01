@@ -8,20 +8,36 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { BarberService } from 'src/barber_services/barber_service.entity';
 import { Repository } from 'typeorm';
-import { Client } from './client.entity';
+import { Client, ClientStatus } from './client.entity';
 import { CreateClientDto, UpdateClientDto } from './dto/client.dto';
 import { Barber } from 'src/barbers/barber.entity';
+import { BarberClientGateway } from 'src/webSocket/barber-client.gateway';
 
 @Injectable()
 export class ClientsService {
   constructor(
     @InjectRepository(Client)
     private readonly clientRepo: Repository<Client>,
+    private readonly gateway: BarberClientGateway,
     @InjectRepository(BarberService)
     private readonly barberServiceRepo: Repository<BarberService>,
     @InjectRepository(Barber)
     private readonly barberRepo: Repository<Barber>,
+    
   ) {}
+
+  async updateStatus(id: string, status: ClientStatus) {
+    const client = await this.clientRepo.findOne({ where: { id } });
+    if (!client) throw new NotFoundException('Mijoz topilmadi');
+
+    client.status = status;
+    await this.clientRepo.save(client);
+
+    // ✅ WebSocket orqali xabar berish
+    this.gateway.statusChanged(client.id, status);
+
+    return client;
+  }
 
   async create(dto: CreateClientDto) {
     try {
@@ -93,6 +109,8 @@ export class ClientsService {
         // barber: barber,
         // barberService: barberService,
       });
+
+         this.gateway.clientAdded(client);
 
       return await this.clientRepo.save(client);
     } catch (error) {
