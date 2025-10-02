@@ -28,6 +28,15 @@ export class Barber {
 
   @Column({ type: 'enum', enum: Role, default: Role.BARBER })
   role: Role;
+  
+  @Column({ type: 'int', default: 0 })
+  totalSum:number;
+
+  @Column({type:'float',nullable:true})
+  lat: number;
+
+  @Column({type:'float',nullable:true})
+  long: number;
 
   @Column({ type: 'text', nullable: true })
   description: string;

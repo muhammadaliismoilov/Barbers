@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsPhoneNumber, IsInt, IsBoolean, IsOptional, MinLength } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsNotEmpty, IsString, IsPhoneNumber, IsInt, IsBoolean, IsOptional, MinLength, IsNumber } from 'class-validator';
 
 export class CreateBarberDto {
   @ApiProperty({ example: 'Ali ', description: 'Barber to‘liq ismi' })
@@ -37,6 +38,18 @@ export class CreateBarberDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @ApiProperty({ example: 41.311081, description: 'Latitude koordinatasi' })
+  @Type(() => Number)
+  @IsNumber()
+   @IsOptional()
+  lat?: number;
+
+  @ApiProperty({ example: 69.240562, description: 'Longitude koordinatasi' })
+  @Type(() => Number)
+  @IsNumber()
+   @IsOptional()
+  long?: number;
 }
 
 
@@ -77,4 +90,16 @@ export class UpdateBarberDto  {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+  
+  @ApiProperty({ example: 41.311081, description: 'Latitude koordinatasi' })
+  @Type(() => Number)
+  @IsNumber()
+   @IsOptional()
+  lat?: number;
+
+  @ApiProperty({ example: 69.240562, description: 'Longitude koordinatasi' })
+  @Type(() => Number)
+  @IsNumber()
+   @IsOptional()
+  long?: number;
 }

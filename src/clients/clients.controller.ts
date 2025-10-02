@@ -9,7 +9,8 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ClientsService } from './clients.service';
-import { CreateClientDto, UpdateClientDto } from './dto/client.dto';
+import { CreateClientDto, UpdateClientDto, UpdateClientStatusDto } from './dto/client.dto';
+import { ClientStatus } from './client.entity';
 
 
 @ApiTags('Clients') // Swagger bo‘limi nomi
@@ -38,6 +39,15 @@ export class ClientsController {
   @ApiResponse({ status: 404, description: 'Mijoz topilmadi' })
   findOne(@Param('id') id: string) {
     return this.clientService.findOne(id);
+  }
+
+  // ✅ Statusni yangilash (barber bosadi)
+  @Patch(':id/status')
+  updateStatus(
+    @Param('id') id: string,
+    @Body() dto: UpdateClientStatusDto,
+  ) {
+    return this.clientService.updateStatus(id,  dto.status);
   }
  
   @Patch(':id')

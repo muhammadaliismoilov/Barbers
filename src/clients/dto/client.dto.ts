@@ -7,7 +7,22 @@ import {
   IsDateString,
   Matches,
   IsOptional,
+  IsEnum,
 } from 'class-validator';
+import { ClientStatus } from '../client.entity';
+
+
+export class UpdateClientStatusDto {
+  @ApiProperty({
+    example: ClientStatus.PROGRESS,
+    description: 'Mijozning yangi holati',
+    enum: ClientStatus,
+  })
+  @IsEnum(ClientStatus, {
+    message: 'status faqat: pending | progress | completed bo‘lishi kerak',
+  })
+  status: ClientStatus;
+}
 
 export class CreateClientDto {
   @ApiProperty({ example: 'Ali Valiyev', description: 'Mijozning to‘liq ismi' })
