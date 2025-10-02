@@ -8,20 +8,62 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { BarberService } from 'src/barber_services/barber_service.entity';
 import { Repository } from 'typeorm';
-import { Client } from './client.entity';
+import { Client, ClientStatus } from './client.entity';
 import { CreateClientDto, UpdateClientDto } from './dto/client.dto';
 import { Barber } from 'src/barbers/barber.entity';
+import { BarberClientGateway } from 'src/webSocket/barber-client.gateway';
 
 @Injectable()
 export class ClientsService {
   constructor(
     @InjectRepository(Client)
     private readonly clientRepo: Repository<Client>,
+    private readonly gateway: BarberClientGateway,
     @InjectRepository(BarberService)
     private readonly barberServiceRepo: Repository<BarberService>,
     @InjectRepository(Barber)
     private readonly barberRepo: Repository<Barber>,
   ) {}
+
+  // async updateStatus(id: string, status: ClientStatus) {
+  //   const client = await this.clientRepo.findOne({ where: { id } });
+  //   if (!client) throw new NotFoundException('Mijoz topilmadi');
+
+  //   client.status = status;
+  //   await this.clientRepo.save(client);
+
+  //   // ✅ WebSocket orqali xabar berish
+  //   this.gateway.statusChanged(client.id, status);
+
+  //   return client;
+  // }
+
+  async updateStatus(id: string, status: ClientStatus) {
+    const client = await this.clientRepo.findOne({
+      where: { id },
+      relations: ['barber', 'barberService'], // barber va barberService ni ham chaqirib olamiz
+    });
+
+    if (!client) throw new NotFoundException('Mijoz topilmadi');
+
+    client.status = status;
+    await this.clientRepo.save(client);
+
+    // ✅ Agar status COMPLETED bo'lsa, barberning umumiy daromadiga qo‘shib boramiz
+    if (status === ClientStatus.COMPLETED) {
+      if (client.barber && client.barberService) {
+        client.barber.totalSum =
+          (client.barber.totalSum || 0) + client.barberService.price;
+
+        await this.barberRepo.save(client.barber);
+      }
+    }
+
+    // ✅ WebSocket orqali xabar berish
+    this.gateway.statusChanged(client.id, status);
+
+    return client;
+  }
 
   async create(dto: CreateClientDto) {
     try {
@@ -94,11 +136,13 @@ export class ClientsService {
         // barberService: barberService,
       });
 
+      this.gateway.clientAdded(client);
+
       return await this.clientRepo.save(client);
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
       if (error instanceof ConflictException) throw error;
-        if (error instanceof BadRequestException) throw error;
+      if (error instanceof BadRequestException) throw error;
       console.log(error.message);
 
       throw new InternalServerErrorException(
