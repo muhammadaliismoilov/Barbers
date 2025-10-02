@@ -10,6 +10,7 @@ import { ReportsModule } from './reports/reports.module';
 import { ClientsModule } from './clients/clients.module';
 
 import { BarbersModule } from './barbers/barbers.module';
+import { QueuesModule } from './queues/queues.module';
 
 
 @Module({
@@ -35,6 +36,7 @@ import { BarbersModule } from './barbers/barbers.module';
     BarberServicesModule,
     ClientsModule,
     ReportsModule,
+    QueuesModule,
   ],
   controllers: [],
   providers: [],

@@ -18,23 +18,30 @@ async function bootstrap() {
     .setDescription('Barbers project API documentation')
     .setVersion('1.0')
     .addBearerAuth(
-       {
-      type: 'http',
-      scheme: 'bearer',
-      bearerFormat: 'JWT',
-      name: 'Authorization',
-      description: 'JWT tokenni kiriting: Bearer <token>',
-      in: 'header',
-    },
-    'JWT-auth',
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'Authorization',
+        description: 'JWT tokenni kiriting: Bearer <token>',
+        in: 'header',
+      },
+      'JWT-auth',
     )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document);
+  SwaggerModule.setup('api/docs', app, document, {
+    customCssUrl: '/api/docs/swagger-ui.css',
+    customJs: [
+      '/api/docs/swagger-ui-bundle.js',
+      '/api/docs/swagger-ui-standalone-preset.js',
+      '/api/docs/swagger-ui-init.js',
+    ],
+  });
 
   const PORT = process.env.PORT || 4000;
-  await app.listen(PORT,'0.0.0.0', () => {
+  await app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Server is running on http://localhost:${PORT}`);
     console.log(`📖 Swagger docs: http://localhost:${PORT}/api/docs`);
   });

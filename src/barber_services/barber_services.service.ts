@@ -23,7 +23,7 @@ export class BarberServicesService {
   ) {}
 
   // ✅ CREATE
-  async create(dto: CreateBarberServiceDto) {
+  async create(dto: CreateBarberServiceDto): Promise<BarberService>{
     try {
       // Barberni tekshirish
       const barber = await this.barberRepo.findOne({

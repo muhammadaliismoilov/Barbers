@@ -25,19 +25,6 @@ export class ClientsService {
     private readonly barberRepo: Repository<Barber>,
   ) {}
 
-  // async updateStatus(id: string, status: ClientStatus) {
-  //   const client = await this.clientRepo.findOne({ where: { id } });
-  //   if (!client) throw new NotFoundException('Mijoz topilmadi');
-
-  //   client.status = status;
-  //   await this.clientRepo.save(client);
-
-  //   // ✅ WebSocket orqali xabar berish
-  //   this.gateway.statusChanged(client.id, status);
-
-  //   return client;
-  // }
-
   async updateStatus(id: string, status: ClientStatus) {
     const client = await this.clientRepo.findOne({
       where: { id },
