@@ -11,13 +11,19 @@ import {
 
 // 📝 Create DTO
 export class CreateBarberServiceDto {
+
+  @ApiProperty({ example: 'b1a6c4e3-9d49-4d3c-9d23-fb1c1e61e1c4', description: 'Barber ID' })
+  @IsNotEmpty({ message: 'Barber ID bo‘sh bo‘lmasligi kerak' })
+  @IsString()
+  barberId: string;
+
   @ApiProperty({
     example: 'Soch olish',
     description: 'Xizmat nomi',
     maxLength: 100,
   })
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({message:'Xizmat nomi bosh bolmasligi kerak'})
   @MaxLength(100)
   title: string;
 
@@ -39,6 +45,12 @@ export class CreateBarberServiceDto {
 
 // 📝 Update DTO
 export class UpdateBarberServiceDto extends PartialType(CreateBarberServiceDto) {
+
+  @ApiProperty({ example: 'b1a6c4e3-9d49-4d3c-9d23-fb1c1e61e1c4', description: 'Barber ID',required:false })
+  @IsOptional()
+  @IsString( { message: 'Barber ID noto‘g‘ri formatda' })
+  barberId?: string;
+
   @ApiProperty({
     example: 'Soqol olish',
     description: 'Yangilangan xizmat nomi',

@@ -12,7 +12,7 @@ import { ClientsService } from './clients.service';
 import { CreateClientDto, UpdateClientDto } from './dto/client.dto';
 
 
-@ApiTags('clients') // Swagger bo‘limi nomi
+@ApiTags('Clients') // Swagger bo‘limi nomi
 @Controller('clients')
 export class ClientsController {
   constructor(private readonly clientService: ClientsService) {}

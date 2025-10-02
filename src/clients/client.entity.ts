@@ -1,4 +1,5 @@
 import { BarberService } from 'src/barber_services/barber_service.entity';
+import { Barber } from 'src/barbers/barber.entity';
 import {
   Column,
   CreateDateColumn,
@@ -27,11 +28,19 @@ export class Client {
 
   @Column()
   phone: string;
-  @Column()
+  
+  @Column({name: 'barber_id' })
+  barberId: string;
+
+  @ManyToOne(() => Barber, (barber) => barber.clients)
+  @JoinColumn({ name: 'barber_id' })
+  barber: Barber;
+  
+  @Column({ name: 'barberService_id' })
   barberServiceId: string;
   
   @ManyToOne(() => BarberService, (service) => service.id,)
-  @JoinColumn({ name: 'barberServiceId' })
+  @JoinColumn({ name: 'barberService_id' })
   barberService: BarberService;
 
   @Column({ type: 'date' })

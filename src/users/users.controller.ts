@@ -1,34 +1,40 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Param, Put, Delete, Body } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/user.dto';
 
+import { User } from './user.entity';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { UpdateUserDto } from './dto/user.dto';
 
+@ApiTags('Users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
-  }
-
   @Get()
-  findAll() {
+  @ApiOperation({ summary: 'Barcha foydalanuvchilarni olish' })
+  @ApiResponse({ status: 200, description: 'Foydalanuvchilar ro‘yxati'})
+  async findAll() {
     return this.usersService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+  @ApiOperation({ summary: 'Bitta foydalanuvchini olish' })
+  @ApiResponse({ status: 200, description: 'Topilgan foydalanuvchi' })
+  async findOne(@Param('id') id: string) {
+    return this.usersService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, ) {
-    return this.usersService.update(+id, );
+  @Put(':id')
+  @ApiOperation({ summary: 'Foydalanuvchini yangilash' })
+  @ApiResponse({ status: 200, description: 'Yangilangan foydalanuvchi' })
+  async update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
+    return this.usersService.update(id, dto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+  @ApiOperation({ summary: 'Foydalanuvchini o‘chirish' })
+  @ApiResponse({ status: 200, description: 'Foydalanuvchi muvaffaqiyatli o‘chirildi' })
+  async remove(@Param('id') id: string) {
+    return this.usersService.remove(id);
   }
 }

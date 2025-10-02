@@ -17,7 +17,17 @@ async function bootstrap() {
     .setTitle('Barbers API') // API nomi
     .setDescription('Barbers project API documentation')
     .setVersion('1.0')
-    .addBearerAuth()
+    .addBearerAuth(
+       {
+      type: 'http',
+      scheme: 'bearer',
+      bearerFormat: 'JWT',
+      name: 'Authorization',
+      description: 'JWT tokenni kiriting: Bearer <token>',
+      in: 'header',
+    },
+    'JWT-auth',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
