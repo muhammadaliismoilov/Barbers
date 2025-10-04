@@ -3,7 +3,6 @@ import {
   Injectable,
   InternalServerErrorException,
   UnauthorizedException,
-  ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -25,7 +24,7 @@ export class AuthService {
   ) {}
 
   // Helper: tokenlar yaratish
-  private getTokens(user: User) {
+  private getTokens(user: User | Barber) {
     const payload = { sub: user.id, phone: user.phone, role: user.role };
 
     const accessToken = this.jwtService.sign(payload, {
@@ -38,7 +37,7 @@ export class AuthService {
       expiresIn: '7d',
     });
 
-    return { accessToken };
+    return { accessToken, refreshToken };
   }
 
   // REGISTER
@@ -71,32 +70,7 @@ export class AuthService {
     }
   }
 
-  // LOGIN
-  // async login(dto: LoginDto) {
-  //   try {
-  //     const user = await this.userRepo.findOne({
-  //       where: { phone: dto.phone },
-  //       select: ['id', 'fullName', 'phone', 'password', 'role'],
-  //     });
-
-  //     if (!user) throw new UnauthorizedException('Telefon raqam yoki parol noto‘g‘ri');
-
-  //     const match = await bcrypt.compare(dto.password, user.password);
-  //     if (!match) throw new UnauthorizedException('Telefon raqam yoki parol noto‘g‘ri');
-
-  //     const tokens = this.getTokens(user);
-
-  //     return {
-  //       user: { id: user.id, fullName: user.fullName, phone: user.phone, role: user.role },
-  //       ...tokens,
-  //     };
-  //   } catch (error) {
-  //     throw new InternalServerErrorException(
-  //       "Login qilishda serverda xatolik yuz berdi",
-  //       error.message,
-  //     );
-  //   }
-  // }
+  //LOGIN
 
   async login(dto: LoginDto) {
     try {
@@ -114,7 +88,7 @@ export class AuthService {
           select: ['id', 'fullName', 'phone', 'password', 'role'],
         });
       }
-      
+
       if (!entity) {
         throw new NotFoundException('Foydalanuvchi topilmadi');
       }
@@ -124,9 +98,22 @@ export class AuthService {
         throw new UnauthorizedException('Parol noto‘g‘ri');
       }
 
-
       // Tokenlar generatsiya qilish
       const tokens = this.getTokens(entity);
+
+      //   res.cookie('access_token', tokens.accessToken, {
+      //   httpOnly: true,   // JS orqali o‘qib bo‘lmaydi
+      //   secure: true,     // faqat HTTPS’da ishlaydi
+      //   sameSite: 'strict',
+      //   maxAge: 1000 * 60 * 15, // 15 minut
+      // });
+
+      // res.cookie('refresh_token', tokens.refreshToken, {
+      //   httpOnly: true,
+      //   secure: true,
+      //   sameSite: 'strict',
+      //   maxAge: 1000 * 60 * 60 * 24 * 7, // 7 kun
+      // });
 
       return {
         user: {
@@ -138,12 +125,34 @@ export class AuthService {
         ...tokens,
       };
     } catch (error) {
-       if(error instanceof NotFoundException)  throw error
-    if(error instanceof UnauthorizedException)  throw error
+      if (error instanceof NotFoundException) throw error;
+      if (error instanceof UnauthorizedException) throw error;
       throw new InternalServerErrorException(
         'Login qilishda serverda xatolik yuz berdi',
         error.message,
       );
     }
   }
+
+  async changePassword(phone: string, newPassword: string) {
+    try {
+      const user = await this.userRepo.findOne({ where: { phone } });
+      if (!user) throw new NotFoundException('Foydalanuvchi topilmadi');
+      const hashed = await bcrypt.hash(newPassword, 10);
+      await this.userRepo.update({ phone }, { password: hashed });
+    } catch (error) {
+      if(error instanceof NotFoundException) throw error
+      throw new InternalServerErrorException(
+        'Parolni o‘zgartirishda serverda xatolik yuz berdi',
+        error.message,
+      );
+    }
+  }
+
+  async logOut(){
+    return {message: "Foydalanuvchi muvaffaqiyatli tizimdan chiqdi"}
+  }
+
+
+
 }
