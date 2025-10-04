@@ -57,3 +57,14 @@ export class LoginDto {
   role?: Role;
 }
 
+export class ChangePasswordDto {
+  @ApiProperty({ example: '+998901234567', description: 'Telefon raqami' })
+  @IsPhoneNumber('UZ', { message: 'Telefon raqami noto‘g‘ri formatda' })
+  phone: string;
+
+  @ApiProperty({ example: 'newPassword123', description: 'Yangi parol' })
+  @IsString()
+  @MinLength(6, { message: 'Yangi parol kamida 6 ta belgidan iborat bo‘lishi kerak' })
+  newPassword: string;
+}
+

@@ -80,8 +80,12 @@ export class BarbersService {
       if (dto.password) {
         dto.password = await bcrypt.hash(dto.password, 10);
       }
-
-      Object.assign(barber, dto);
+      for (const [key, value] of Object.entries(dto)) {
+      if (value !== undefined && value !== null && value !== '') {
+        (barber as any)[key] = value;
+      }
+    }
+  
       return this.barberRepository.save(barber);
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
