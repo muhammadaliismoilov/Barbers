@@ -1,6 +1,16 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsNotEmpty, IsString, IsPhoneNumber, IsInt, IsBoolean, IsOptional, MinLength, IsNumber } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsPhoneNumber,
+  IsInt,
+  IsBoolean,
+  IsOptional,
+  MinLength,
+  IsNumber,
+} from 'class-validator';
+import { Role } from 'src/users/user.entity';
 
 export class CreateBarberDto {
   @ApiProperty({ example: 'Ali ', description: 'Barber to‘liq ismi' })
@@ -8,18 +18,28 @@ export class CreateBarberDto {
   @IsString({ message: 'To‘liq ism matn bo‘lishi kerak' })
   fullName: string;
 
-  @ApiProperty({ example: '+998901234567', description: 'Barber telefon raqami (unikal)' })
+  @ApiProperty({
+    example: '+998901234567',
+    description: 'Barber telefon raqami (unikal)',
+  })
   @IsNotEmpty({ message: 'Telefon raqam majburiy' })
   @IsPhoneNumber('UZ', { message: 'Telefon raqam noto‘g‘ri formatda' })
   phone: string;
 
-  @ApiProperty({ example: 'password123', description: 'Parol (kamida 6 ta belgidan iborat)' })
+  @ApiProperty({
+    example: 'password123',
+    description: 'Parol (kamida 6 ta belgidan iborat)',
+  })
   @IsNotEmpty({ message: 'Parol majburiy' })
   @IsString({ message: 'Parol matn bo‘lishi kerak' })
   @MinLength(6, { message: 'Parol kamida 6 belgidan iborat bo‘lishi kerak' })
   password: string;
 
-  @ApiProperty({ example: 'Soch olish va soqol olish xizmatlari', description: 'Barber haqida qisqacha ma’lumot', required: false })
+  @ApiProperty({
+    example: 'Soch olish va soqol olish xizmatlari',
+    description: 'Barber haqida qisqacha ma’lumot',
+    required: false,
+  })
   @IsOptional()
   @IsString()
   description?: string;
@@ -29,12 +49,20 @@ export class CreateBarberDto {
   @IsInt({ message: 'Tajriba raqam bo‘lishi kerak' })
   experienceYears?: number;
 
-  @ApiProperty({ example: '09:00 - 20:00', description: 'Ish vaqti', required: false })
+  @ApiProperty({
+    example: '09:00 - 20:00',
+    description: 'Ish vaqti',
+    required: false,
+  })
   @IsOptional()
   @IsString()
   workHours?: string;
 
-  @ApiProperty({ example: true, description: 'Faollik holati', required: false })
+  @ApiProperty({
+    example: true,
+    description: 'Faollik holati',
+    required: false,
+  })
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
@@ -42,36 +70,54 @@ export class CreateBarberDto {
   @ApiProperty({ example: 41.311081, description: 'Latitude koordinatasi' })
   @Type(() => Number)
   @IsNumber()
-   @IsOptional()
+  @IsOptional()
   lat?: number;
 
   @ApiProperty({ example: 69.240562, description: 'Longitude koordinatasi' })
   @Type(() => Number)
   @IsNumber()
-   @IsOptional()
+  @IsOptional()
   long?: number;
 }
 
-
-
-export class UpdateBarberDto  {
-  @ApiPropertyOptional({ example: 'Vali Karimov', description: 'Barber to‘liq ismi' })
+export class UpdateBarberDto {
+  @ApiPropertyOptional({
+    example: 'Vali Karimov',
+    description: 'Barber to‘liq ismi',
+  })
   @IsOptional()
   @IsString()
   fullName?: string;
 
-  @ApiPropertyOptional({ example: '+998909876543', description: 'Barber telefon raqami (unikal)' })
+  @ApiPropertyOptional({
+    example: '+998909876543',
+    description: 'Barber telefon raqami (unikal)',
+  })
   @IsOptional()
   @IsPhoneNumber('UZ')
   phone?: string;
 
-  @ApiPropertyOptional({ example: 'NewPassword123', description: 'Yangi parol' })
+  @ApiPropertyOptional({
+    example: 'NewPassword123',
+    description: 'Yangi parol',
+  })
   @IsOptional()
   @IsString()
   @MinLength(6)
   password?: string;
 
-  @ApiPropertyOptional({ example: 'Professional barber', description: 'Qisqacha ma’lumot' })
+  @ApiPropertyOptional({
+    example: 'Barber ro`lini o`zgartrish',
+    description: 'Barber ro`lini o`zgartirish  uchun',
+  })
+  @IsOptional()
+  @IsString({ each: true })
+  role?:Role[]
+
+  @ApiPropertyOptional({
+    example: 'Professional barber',
+    description: 'Qisqacha ma’lumot',
+  })
   @IsOptional()
   @IsString()
   description?: string;
@@ -90,16 +136,16 @@ export class UpdateBarberDto  {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
-  
+
   @ApiProperty({ example: 41.311081, description: 'Latitude koordinatasi' })
   @Type(() => Number)
   @IsNumber()
-   @IsOptional()
+  @IsOptional()
   lat?: number;
 
   @ApiProperty({ example: 69.240562, description: 'Longitude koordinatasi' })
   @Type(() => Number)
   @IsNumber()
-   @IsOptional()
+  @IsOptional()
   long?: number;
 }
