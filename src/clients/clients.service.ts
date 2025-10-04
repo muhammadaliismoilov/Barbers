@@ -190,8 +190,11 @@ export class ClientsService {
         client.barberService = barberService;
       }
 
-      // qolgan fieldlarni yangilash
-      Object.assign(client, dto);
+      for (const [key, value] of Object.entries(dto)) {
+        if (value !== undefined && value !== null && value !== '') {
+          (client as any)[key] = value;
+        }
+      }
 
       return await this.clientRepo.save(client);
     } catch (error) {

@@ -23,7 +23,7 @@ export class BarberServicesService {
   ) {}
 
   // ✅ CREATE
-  async create(dto: CreateBarberServiceDto): Promise<BarberService>{
+  async create(dto: CreateBarberServiceDto): Promise<BarberService> {
     try {
       // Barberni tekshirish
       const barber = await this.barberRepo.findOne({
@@ -99,7 +99,11 @@ export class BarberServicesService {
       const service = await this.findOne(id);
       if (!service)
         throw new NotFoundException(`ID=${id} bo‘lgan xizmat topilmadi`);
-      Object.assign(service, dto);
+      for (const [key, value] of Object.entries(dto)) {
+        if (value !== undefined && value !== null && value !== '') {
+          (service as any)[key] = value;
+        }
+      }
       return await this.barberServiceRepo.save(service);
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
