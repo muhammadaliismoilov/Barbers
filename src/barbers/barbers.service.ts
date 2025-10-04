@@ -62,9 +62,7 @@ export class BarbersService {
 
     return barber;
   } catch (error) {
-    if (error instanceof NotFoundException) throw error;
-    console.log(error.message);
-    
+    if (error instanceof NotFoundException) throw error;  
     throw new InternalServerErrorException(
       'Barberni olishda serverda xatolik yuz berdi',
       error.message,
@@ -73,24 +71,33 @@ export class BarbersService {
 }
 
 
-  async update(id: string, dto: UpdateBarberDto): Promise<Barber> {
+  async update(id: string, dto: UpdateBarberDto) {
     try {
-      const barber = await this.findOne(id);
-      if (!barber) throw new NotFoundException('Barber topilmadi');
-      if (dto.password) {
-        dto.password = await bcrypt.hash(dto.password, 10);
+      const barber = await this.barberRepository.findOne({ where: { id } });
+      if (!barber) {
+        throw new NotFoundException(`Barber topilmadi (id: ${id})`);
       }
-      for (const [key, value] of Object.entries(dto)) {
-      if (value !== undefined && value !== null && value !== '') {
-        (barber as any)[key] = value;
-      }
-    }
   
-      return this.barberRepository.save(barber);
+      for (const [key, value] of Object.entries(dto)) {
+        if (value !== undefined && value !== null && value !== '') {
+          if (key === 'role') {
+            // agar string bo‘lsa arrayga o‘ramiz
+            const newRoles = Array.isArray(value) ? value : [value];
+  
+            // eski ro‘llarni saqlab, yangilarni qo‘shamiz (dublikatlarni oldini olamiz)
+            const mergedRoles = Array.from(new Set([...(barber.role || []), ...newRoles]));
+  
+            (barber as any)[key] = mergedRoles;
+          } else {
+            (barber as any)[key] = value;
+          }
+        }
+      }
+      return await this.barberRepository.save(barber);
     } catch (error) {
-      if (error instanceof NotFoundException) throw error;
+      if(error instanceof NotFoundException)throw error
       throw new InternalServerErrorException(
-        'Barber maluotlarini yangilashada serverda xatolik yuz berdi',
+        'Barberni yangilashda xatolik yuz berdi',
         error.message,
       );
     }

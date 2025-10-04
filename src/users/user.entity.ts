@@ -1,10 +1,16 @@
 import { Barber } from 'src/barbers/barber.entity';
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 export enum Role {
   BARBER = 'barber',
   Admin = 'admin',
-  USER = 'user'
+  USER = 'user',
 }
 
 @Entity('users')
@@ -21,15 +27,12 @@ export class User {
   @Column()
   password: string;
 
-  @Column({ type: 'enum', enum: Role, default: Role.USER })
-  role: Role;
+  @Column({ type: 'enum', enum: Role, array: true, default: [Role.USER] })
+  role: Role[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
-
-  
-
 }

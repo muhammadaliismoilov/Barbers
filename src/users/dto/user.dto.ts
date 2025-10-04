@@ -4,13 +4,19 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { Role } from '../user.entity';
 
-export class UpdateUserDto  {
-  @ApiPropertyOptional({ example: 'Ali Valiyev', description: 'Foydalanuvchi to‘liq ismi' })
+export class UpdateUserDto {
+  @ApiPropertyOptional({
+    example: 'Ali Valiyev',
+    description: 'Foydalanuvchi to‘liq ismi',
+  })
   @IsOptional()
   @IsString()
   fullName?: string;
 
-  @ApiPropertyOptional({ example: '+998901234567', description: 'Telefon raqami (unikal)' })
+  @ApiPropertyOptional({
+    example: '+998901234567',
+    description: 'Telefon raqami (unikal)',
+  })
   @IsOptional()
   @IsString()
   phone?: string;
@@ -20,4 +26,11 @@ export class UpdateUserDto  {
   @IsString()
   password?: string;
 
+  @ApiPropertyOptional({
+    example: 'User ro`lini o`zgartrish',
+    description: 'User ro`lini o`zgartirish  uchun',
+  })
+  @IsOptional()
+  @IsString({ each: true })
+  role?: Role[];
 }
