@@ -26,16 +26,21 @@ export class Barber {
   @Column()
   password: string;
 
-  @Column({ type: 'enum', enum: Role, default: Role.BARBER })
-  role: Role;
-  
-  @Column({ type: 'int', default: 0 })
-  totalSum:number;
+  @Column({
+    type: 'enum',
+    enum: Role,
+    array: true, // <-- array qilib qo‘yiladi
+    default: [Role.BARBER],
+  })
+  role: Role[];
 
-  @Column({type:'float',nullable:true})
+  @Column({ type: 'int', default: 0 })
+  totalSum: number;
+
+  @Column({ type: 'float', nullable: true })
   lat: number;
 
-  @Column({type:'float',nullable:true})
+  @Column({ type: 'float', nullable: true })
   long: number;
 
   @Column({ type: 'text', nullable: true })
@@ -43,7 +48,6 @@ export class Barber {
 
   @Column({ type: 'int', default: 0 })
   experienceYears: number;
-
 
   @Column({ type: 'varchar', length: 100, nullable: true })
   workHours: string; // Masalan: "09:00 - 20:00"

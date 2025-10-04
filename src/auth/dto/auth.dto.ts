@@ -46,15 +46,6 @@ export class LoginDto {
   @MinLength(6, { message: 'Parol kamida 6 ta belgidan iborat bo‘lishi kerak' })
   password: string;
 
-  @ApiProperty({
-    example: Role.USER,
-    enum: Role,
-    required: false,
-    description: 'Role (admin, user, barber) tanlash ixtiyoriy',
-  })
-  @IsOptional()
-  @IsEnum(Role, { message: 'Role faqat admin | user | barber bo‘lishi mumkin' })
-  role?: Role;
 }
 
 export class ChangePasswordDto {

@@ -13,6 +13,7 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { Barber } from 'src/barbers/barber.entity';
 
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -55,7 +56,7 @@ export class AuthService {
         fullName: dto.fullName,
         phone: dto.phone,
         password: hashed,
-        role: Role.USER,
+        role: [Role.USER],
       });
 
       const saved = await this.userRepo.save(user);
@@ -70,24 +71,60 @@ export class AuthService {
     }
   }
 
-  //LOGIN
+    //LOGIN ADMIN
+
+    async loginAdmin(dto: LoginDto) {
+    try {
+      let entity : User | Barber| null= null;
+
+      entity =await this.userRepo.findOne({where:{phone:dto.phone},select:['id', 'password','role']})
+      
+      if(!entity){
+        entity =await this.barberRepo.findOne({where:{phone:dto.phone},select:['id', 'password','role']})
+      }
+
+      if (!entity) {
+        throw new NotFoundException('Foydalanuvchi topilmadi');
+      }
+      if(!entity.role.includes(Role.Admin)){
+        throw new UnauthorizedException('Foydalanuvchi admin emas');
+      }
+
+      const match = await bcrypt.compare(dto.password, entity.password);
+      if (!match) {
+        throw new UnauthorizedException('Parol noto‘g‘ri');
+      }
+
+      // Tokenlar generatsiya qilish
+      const tokens = this.getTokens(entity);
+
+
+      return {
+        user: {
+          id: entity.id,
+          role: entity.role,
+        },
+        ...tokens,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      if (error instanceof UnauthorizedException) throw error;
+      console.log(error);
+      
+      throw new InternalServerErrorException(
+        'Login qilishda serverda xatolik yuz berdi',
+        error.message,
+      );
+    }
+  }
+
+
+  //LOGIN USER
 
   async login(dto: LoginDto) {
     try {
-      let entity: User | Barber | null = null;
-      const role = dto.role ?? Role.USER;
 
-      if (role === Role.USER || role === Role.Admin) {
-        entity = await this.userRepo.findOne({
-          where: { phone: dto.phone },
-          select: ['id', 'fullName', 'phone', 'password', 'role'],
-        });
-      } else if (role === Role.BARBER || role === Role.Admin) {
-        entity = await this.barberRepo.findOne({
-          where: { phone: dto.phone },
-          select: ['id', 'fullName', 'phone', 'password', 'role'],
-        });
-      }
+      const entity =await this.userRepo.findOne({where:{phone:dto.phone},select:['id', 'password','role']})
 
       if (!entity) {
         throw new NotFoundException('Foydalanuvchi topilmadi');
@@ -101,25 +138,10 @@ export class AuthService {
       // Tokenlar generatsiya qilish
       const tokens = this.getTokens(entity);
 
-      //   res.cookie('access_token', tokens.accessToken, {
-      //   httpOnly: true,   // JS orqali o‘qib bo‘lmaydi
-      //   secure: true,     // faqat HTTPS’da ishlaydi
-      //   sameSite: 'strict',
-      //   maxAge: 1000 * 60 * 15, // 15 minut
-      // });
-
-      // res.cookie('refresh_token', tokens.refreshToken, {
-      //   httpOnly: true,
-      //   secure: true,
-      //   sameSite: 'strict',
-      //   maxAge: 1000 * 60 * 60 * 24 * 7, // 7 kun
-      // });
 
       return {
         user: {
           id: entity.id,
-          fullName: entity.fullName,
-          phone: entity.phone,
           role: entity.role,
         },
         ...tokens,
@@ -127,6 +149,47 @@ export class AuthService {
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
       if (error instanceof UnauthorizedException) throw error;
+      console.log(error);
+      
+      throw new InternalServerErrorException(
+        'Login qilishda serverda xatolik yuz berdi',
+        error.message,
+      );
+    }
+  }
+
+   async loginBarber(dto: LoginDto) {
+    try {
+      const entity =await this.barberRepo.findOne({where:{phone:dto.phone},select:['id', 'password','role']})
+
+      if (!entity) {
+        throw new NotFoundException('Foydalanuvchi topilmadi');
+      }
+      if(!entity.role.includes(Role.BARBER)){
+        throw new UnauthorizedException('Foydalanuvchi barber emas');
+      }
+
+      const match = await bcrypt.compare(dto.password, entity.password);
+      if (!match) {
+        throw new UnauthorizedException('Parol noto‘g‘ri');
+      }
+
+      // Tokenlar generatsiya qilish
+      const tokens = this.getTokens(entity);
+
+
+      return {
+        user: {
+          id: entity.id,
+          role: entity.role,
+        },
+        ...tokens,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      if (error instanceof UnauthorizedException) throw error;
+      console.log(error);
+      
       throw new InternalServerErrorException(
         'Login qilishda serverda xatolik yuz berdi',
         error.message,

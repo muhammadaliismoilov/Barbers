@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
@@ -11,14 +15,14 @@ export class UsersService {
     private readonly userRepo: Repository<User>,
   ) {}
 
-  async findAll(){
+  async findAll() {
     try {
       return await this.userRepo.find({
         // relations: ['barber'], // barber bilan join qilinadi
       });
     } catch (error) {
       console.log(error.message);
-      
+
       throw new InternalServerErrorException(
         'Foydalanuvchilarni olishda xatolik yuz berdi',
         error.message,
@@ -26,7 +30,7 @@ export class UsersService {
     }
   }
 
-  async findOne(id: string){
+  async findOne(id: string) {
     try {
       const user = await this.userRepo.findOne({
         where: { id },
@@ -46,28 +50,40 @@ export class UsersService {
     }
   }
 
- async update(id: string, dto: UpdateUserDto) {
-  try {
-    const user = await this.userRepo.findOne({ where: { id } });
-    if (!user) {
-      throw new NotFoundException(`Foydalanuvchi topilmadi (id: ${id})`);
-    }
-
-    for (const [key, value] of Object.entries(dto)) {
-      if (value !== undefined && value !== null && value !== '') {
-        (user as any)[key] = value;
+  async update(id: string, dto: UpdateUserDto) {
+    try {
+      const user = await this.userRepo.findOne({ where: { id } });
+      if (!user) {
+        throw new NotFoundException(`Foydalanuvchi topilmadi (id: ${id})`);
       }
+
+      for (const [key, value] of Object.entries(dto)) {
+        if (value !== undefined && value !== null && value !== '') {
+          if (key === 'role') {
+            // agar string bo‘lsa arrayga o‘ramiz
+            const newRoles = Array.isArray(value) ? value : [value];
+
+            // eski ro‘llarni saqlab, yangilarni qo‘shamiz (dublikatlarni oldini olamiz)
+            const mergedRoles = Array.from(
+              new Set([...(user.role || []), ...newRoles]),
+            );
+
+            (user as any)[key] = mergedRoles;
+          } else {
+            (user as any)[key] = value;
+          }
+        }
+      }
+
+      return await this.userRepo.save(user);
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException(
+        'Foydalanuvchini yangilashda xatolik yuz berdi',
+        error.message,
+      );
     }
-
-    return await this.userRepo.save(user);
-  } catch (error) {
-    throw new InternalServerErrorException(
-      'Foydalanuvchini yangilashda xatolik yuz berdi',
-      error.message,
-    );
   }
-}
-
 
   async remove(id: string) {
     try {
