@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty,  } from '@nestjs/swagger';
 
 export class ReportDto {
   @ApiProperty({ example: 25000, description: 'Kunlik daromad' })

@@ -13,18 +13,25 @@ export class ReportsService {
     @InjectRepository(BarberService)
     private barberServiceRepo: Repository<BarberService>,
   ) {}
-
-  async getDailyReport(date: string): Promise<ReportDto> {
+async getDailyReport(date?: string): Promise<ReportDto> {
   try {
-      // ✅ date format: "2025-09-25"
-    const start = new Date(date);
-    const end = new Date(date);
+    // ✅ Agar date berilmagan bo‘lsa, bir kun oldingi sanani olamiz
+    let targetDate: Date;
+    if (!date) {
+      targetDate = new Date();
+      targetDate.setDate(targetDate.getDate() - 1); // kechagi kun
+    } else {
+      targetDate = new Date(date);
+    }
+
+    const start = new Date(targetDate);
+    const end = new Date(targetDate);
     end.setHours(23, 59, 59, 999);
 
     // --- Jami mijozlar va tugallanganlar
     const clients = await this.clientRepo.find({
       where: { createdAt: Between(start, end) },
-      relations: ['barberService'], 
+      relations: ['barberService'],
     });
 
     const totalClients = clients.length;
@@ -58,7 +65,7 @@ export class ReportsService {
 
     // --- Soatlar bo‘yicha
     const hoursBy = clients.reduce((acc, c) => {
-      const hour = new Date(c.createdAt).getHours() + ':00'; // ✅ createdAt ishlatiladi
+      const hour = new Date(c.createdAt).getHours() + ':00';
       const found = acc.find((h) => h.hour === hour);
       if (found) {
         found.clients += 1;
@@ -81,9 +88,12 @@ export class ReportsService {
       servicesBy,
       hoursBy,
     };
-  }
- catch (error) {
-   throw new  InternalServerErrorException('Xisobotlarni olishda serverda xatolik yuz berdi',error.message)
+  } catch (error) {
+    throw new InternalServerErrorException(
+      'Xisobotlarni olishda serverda xatolik yuz berdi',
+      error.message,
+    );
   }
 }
+
 }

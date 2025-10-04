@@ -7,11 +7,20 @@ import {
   Patch,
   Delete,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBody,
+} from '@nestjs/swagger';
 import { ClientsService } from './clients.service';
-import { CreateClientDto, UpdateClientDto, UpdateClientStatusDto } from './dto/client.dto';
+import {
+  CreateClientDto,
+  UpdateClientDto,
+  UpdateClientStatusDto,
+} from './dto/client.dto';
 import { ClientStatus } from './client.entity';
-
 
 @ApiTags('Clients') // Swagger bo‘limi nomi
 @Controller('clients')
@@ -20,7 +29,7 @@ export class ClientsController {
 
   @Post()
   @ApiOperation({ summary: 'Yangi mijoz qo‘shish' })
-  @ApiResponse({ status: 201, description: 'Mijoz muvaffaqiyatli qo‘shildi'})
+  @ApiResponse({ status: 201, description: 'Mijoz muvaffaqiyatli qo‘shildi' })
   @ApiResponse({ status: 404, description: 'Barber service topilmadi' })
   create(@Body() createClientDto: CreateClientDto) {
     return this.clientService.create(createClientDto);
@@ -35,7 +44,7 @@ export class ClientsController {
 
   @Get(':id')
   @ApiOperation({ summary: 'ID bo‘yicha mijozni olish' })
-  @ApiResponse({ status: 200, description: 'Mijoz topildi'})
+  @ApiResponse({ status: 200, description: 'Mijoz topildi' })
   @ApiResponse({ status: 404, description: 'Mijoz topilmadi' })
   findOne(@Param('id') id: string) {
     return this.clientService.findOne(id);
@@ -43,17 +52,33 @@ export class ClientsController {
 
   // ✅ Statusni yangilash (barber bosadi)
   @Patch(':id/status')
-  updateStatus(
-    @Param('id') id: string,
-    @Body() dto: UpdateClientStatusDto,
-  ) {
-    return this.clientService.updateStatus(id,  dto.status);
+  @ApiOperation({ summary: 'Mijoz statusini yangilash' })
+  @ApiParam({
+    name: 'id',
+    description: 'Mijoz ID (UUID formatda)',
+    example: '7b0d9e0f-7b65-4c29-8e5f-4f502b7cb4e3',
+  })
+  @ApiBody({
+    description: 'Yangi status qiymati',
+    type: UpdateClientStatusDto,
+    examples: {
+      completed: { summary: 'Tugallandi', value: { status: 'completed' } },
+      progress: { summary: 'Jarayonda', value: { status: 'progress' } },
+    },
+  })
+  @ApiResponse({ status: 200, description: 'Status muvaffaqiyatli yangilandi' })
+  @ApiResponse({ status: 404, description: 'Mijoz topilmadi' })
+  updateStatus(@Param('id') id: string, @Body() dto: UpdateClientStatusDto) {
+    return this.clientService.updateStatus(id, dto.status);
   }
- 
+
   @Patch(':id')
   @ApiOperation({ summary: 'Mijoz ma’lumotlarini yangilash' })
-  @ApiResponse({ status: 200, description: 'Mijoz muvaffaqiyatli yangilandi'})
-  @ApiResponse({ status: 404, description: 'Mijoz yoki barber service topilmadi' })
+  @ApiResponse({ status: 200, description: 'Mijoz muvaffaqiyatli yangilandi' })
+  @ApiResponse({
+    status: 404,
+    description: 'Mijoz yoki barber service topilmadi',
+  })
   update(@Param('id') id: string, @Body() updateClientDto: UpdateClientDto) {
     return this.clientService.update(id, updateClientDto);
   }
