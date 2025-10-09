@@ -124,11 +124,12 @@ export class UsersService {
       }
 
       // Haversine formula (km)
-      const distance = `(6371 * acos(
-      cos(radians(:lat)) * cos(radians(barbers.lat)) *
-      cos(radians(barbers.lng) - radians(:lng)) +
-      sin(radians(:lat)) * sin(radians(barbers.lat))
-    ))`;
+      const distance = `ROUND(CAST(
+         (6371 * acos(
+           cos(radians(:lat)) * cos(radians(barbers.lat)) *
+           cos(radians(barbers.lng) - radians(:lng)) +
+           sin(radians(:lat)) * sin(radians(barbers.lat))
+         )) AS numeric ), 2 )`;
 
       // So‘rov
       const barbers = await this.barberRepo
@@ -136,6 +137,7 @@ export class UsersService {
         .select([
           'barbers.fullName AS name',
           'barbers.phone AS phone',
+          'barbers.workHours AS workingHours',
           'barbers.experienceYears AS experienceYears',
           'barbers.description AS description',
           'barbers.lat AS lat',
@@ -158,7 +160,7 @@ export class UsersService {
       return barbers;
     } catch (error) {
       console.error('getBarbersNearby error:', error);
-      if(error instanceof NotFoundException) throw error
+      if (error instanceof NotFoundException) throw error;
       throw new InternalServerErrorException(
         'Yaqin atrofdagi barberlarni olishda xatolik yuz berdi',
       );
