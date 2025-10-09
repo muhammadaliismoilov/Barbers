@@ -41,7 +41,7 @@ export class Barber {
   lat: number;
 
   @Column({ type: 'float', nullable: true })
-  long: number;
+  lng: number;
 
   @Column({ type: 'text', nullable: true })
   description: string;

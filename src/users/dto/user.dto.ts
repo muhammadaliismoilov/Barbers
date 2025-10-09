@@ -1,22 +1,22 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import {  IsNumber, IsOptional, IsString } from 'class-validator';
 import { Role } from '../user.entity';
 import { Type } from 'class-transformer';
 
 export class NearbyBarbersDto{
-  @ApiProperty({example:43.2343423, description:`Latitude koordinatasi`})
+  @ApiProperty({example:41.551070, description:`Latitude koordinatasi`})
   @Type(() => Number)
   @IsNumber()
   lat: number;
 
-  @ApiProperty({example:69.240562, description:`Longitude koordinatasi`})
+  @ApiProperty({example: 60.605706, description:`Longitude koordinatasi`})
   @Type(() => Number)
   @IsNumber()
   lng: number;
   
-  @ApiProperty({example:3, description:`Radius(km)`,default:3})
+  @ApiProperty({example:3, description:`Radius(km)`,default:3, required: false })
   @Type(()=> Number)
   @IsNumber()
   @IsOptional()
