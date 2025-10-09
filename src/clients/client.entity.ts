@@ -28,18 +28,18 @@ export class Client {
 
   @Column()
   phone: string;
-  
-  @Column({name: 'barber_id' })
+
+  @Column({ name: 'barber_id' })
   barberId: string;
 
-  @ManyToOne(() => Barber, (barber) => barber.clients)
+  @ManyToOne(() => Barber, (barber) => barber.clients, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'barber_id' })
   barber: Barber;
-  
+
   @Column({ name: 'barberService_id' })
   barberServiceId: string;
-  
-  @ManyToOne(() => BarberService, (service) => service.id,)
+
+  @ManyToOne(() => BarberService, (service) => service.id)
   @JoinColumn({ name: 'barberService_id' })
   barberService: BarberService;
 

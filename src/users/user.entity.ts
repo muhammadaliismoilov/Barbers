@@ -9,8 +9,9 @@ import {
 
 export enum Role {
   BARBER = 'barber',
-  Admin = 'admin',
+  ADMIN = 'admin',
   USER = 'user',
+  SUPERADMIN = 'superadmin',
 }
 
 @Entity('users')
@@ -29,6 +30,12 @@ export class User {
 
   @Column({ type: 'enum', enum: Role, array: true, default: [Role.USER] })
   role: Role[];
+
+   @Column({ type: 'float', nullable: true })
+  lat: number;
+
+  @Column({ type: 'float', nullable: true })
+  lng: number;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -6,13 +7,19 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
-import { UpdateUserDto } from './dto/user.dto';
+import { NearbyBarbersDto, UpdateUserDto } from './dto/user.dto';
+import { Barber } from 'src/barbers/barber.entity';
+import { BarberService } from 'src/barber_services/barber_service.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
+    @InjectRepository(Barber)
+    private readonly barberRepo: Repository<Barber>,
+    @InjectRepository(BarberService)
+    private readonly barberServiceRepo: Repository<BarberService>,
   ) {}
 
   async findAll() {
@@ -98,6 +105,62 @@ export class UsersService {
       throw new InternalServerErrorException(
         'Foydalanuvchini o‘chirishda xatolik yuz berdi',
         error.message,
+      );
+    }
+  }
+
+  async getBarbersNearby(dto: NearbyBarbersDto) {
+    try {
+      const { lat, lng, radius } = dto;
+
+      // radius km da kiritiladi
+      const searchRadius = radius && !isNaN(+radius) ? +radius : 1;
+
+      // Kiritilgan koordinatalarni tekshirish
+      if (isNaN(lat) || isNaN(lng)) {
+        throw new BadRequestException(
+          'Latitude yoki longitude noto‘g‘ri formatda kiritilgan',
+        );
+      }
+
+      // Haversine formula (km)
+      const distance = `(6371 * acos(
+      cos(radians(:lat)) * cos(radians(barbers.lat)) *
+      cos(radians(barbers.long) - radians(:lng)) +
+      sin(radians(:lat)) * sin(radians(barbers.lat))
+    ))`;
+
+      // So‘rov
+      const barbers = await this.barberRepo
+        .createQueryBuilder('barbers')
+        .select([
+          'barbers.fullName AS name',
+          'barbers.phone AS phone',
+          'barbers.experienceYears AS experienceYears',
+          'barbers.description AS description',
+          'barbers.lat AS lat',
+          'barbers.long AS long',
+          'barbers.isActive AS isActive',
+        ])
+        .addSelect(distance, 'distance')
+        .where(`${distance} < :radius`, { lat, lng, radius: searchRadius })
+        .andWhere('barbers.isActive = :isActive', { isActive: true }) // ✅ to‘g‘rilandi
+        .orderBy('distance', 'ASC')
+        .getRawMany();
+
+      // Agar sartarosh topilmasa
+      if (!barbers.length) {
+        throw new NotFoundException(
+          'Berilgan koordinatalar bo‘yicha sartaroshlar topilmadi',
+        );
+      }
+
+      return barbers;
+    } catch (error) {
+      console.error('getBarbersNearby error:', error);
+
+      throw new InternalServerErrorException(
+        'Yaqin atrofdagi barberlarni olishda xatolik yuz berdi',
       );
     }
   }

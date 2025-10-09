@@ -18,7 +18,7 @@ export class BarberService {
   barberId: string;
   
   @ManyToOne(() => Barber, (barber) => barber.servicesList, {
-    onDelete: 'CASCADE',
+    onDelete: 'CASCADE', 
   })
   @JoinColumn({ name: 'barber_id' })
   barber: Barber;

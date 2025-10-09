@@ -56,7 +56,7 @@ export class Barber {
   isActive: boolean;
 
   // Barber -> BarberService (1 -> ko‘p)
-  @OneToMany(() => BarberService, (service) => service.barber)
+  @OneToMany(() => BarberService, (service) => service.barber, {cascade:true})
   servicesList: BarberService[];
 
   @OneToMany(() => Client, (client) => client.barber)

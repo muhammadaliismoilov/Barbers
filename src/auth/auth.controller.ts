@@ -54,7 +54,7 @@ export class AuthController {
     });
     return res.json({
       xabar: 'Tizimga muvaffaqiyatli kirildi',
-      user: result.user, // foydalanuvchi haqida ma’lumot qaytarish mumkin
+      user: result, // foydalanuvchi haqida ma’lumot qaytarish mumkin
     });
   }
 
@@ -73,6 +73,7 @@ export class AuthController {
   async loginBarber(@Body() dto: LoginDto, @Res() res: Response) {
     const result = await this.authService.loginBarber(dto);
 
+    
     res.cookie('access_token', result.accessToken, {
       httpOnly: true, // JS orqali o‘qib bo‘lmaydi
       secure: true, // faqat HTTPS’da ishlaydi
@@ -88,7 +89,7 @@ export class AuthController {
     });
     return res.json({
       xabar: 'Tizimga muvaffaqiyatli kirildi',
-      user: result.user, // foydalanuvchi haqida ma’lumot qaytarish mumkin
+      user: result, // foydalanuvchi haqida ma’lumot qaytarish mumkin
     });
   }
 
@@ -122,7 +123,7 @@ export class AuthController {
     });
     return res.json({
       xabar: 'Tizimga muvaffaqiyatli kirildi',
-      user: result.user, // foydalanuvchi haqida ma’lumot qaytarish mumkin
+      user: result, // foydalanuvchi haqida ma’lumot qaytarish mumkin
     });
   }
 
