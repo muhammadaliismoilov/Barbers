@@ -12,7 +12,7 @@ export class ClientQueueDto {
   @ApiProperty({ example: '+998901112233', description: 'Telefon raqami' })
   phone: string;
 
-  @ApiProperty({ example: '2025-10-01', description: 'Uchrashuv sanasi' })
+  @ApiProperty({ example: '2025-10-01', description: 'Uchrashuv sanasi' ,})
   date: string;
 
   @ApiProperty({ example: '09:00:00', description: 'Uchrashuv vaqti' })

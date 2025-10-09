@@ -9,15 +9,24 @@ import { ClientQueueDto } from './dto/queues.dto';
 export class QueuesController {
   constructor(private readonly queuesService: QueuesService) {}
 
-  @Get(':barberId')
-  @ApiOperation({ summary: 'Barber navbati', description: 'Berilgan barberga tegishli mijozlar navbatini qaytaradi' })
-  @ApiParam({ name: 'barberId', example: 'uuid-barber-123', description: 'Barber IDsi' })
-  @ApiResponse({
-    status: 200,
-    description: 'Berilgan barberning navbatdagi mijozlari',
-    type: [ClientQueueDto],
-  })
-  async getBarberQueues(@Param('barberId') barberId: string): Promise<ClientQueueDto[]> {
-    return this.queuesService.queues(barberId);
-  }
+
+@Get(':barberId')
+@ApiOperation({ summary: 'Barber navbatini olish' })
+@ApiParam({
+  name: 'barberId',
+  example: '7b0d9e0f-7b65-4c29-8e5f-4f502b7cb4e3',
+  description: 'Barberning ID raqami',
+})
+@ApiResponse({
+  status: 200,
+  description: 'Berilgan barberga tegishli mijozlar ro‘yxati qaytarildi',
+  type: [ClientQueueDto],
+})
+@ApiResponse({ status: 404, description: 'Barber topilmadi' })
+async getBarberQueues(
+  @Param('barberId') barberId: string,
+): Promise<ClientQueueDto[]> {
+  return this.queuesService.queues(barberId);
+}
+
 }

@@ -86,7 +86,7 @@ export class AuthService {
       if (!entity) {
         throw new NotFoundException('Foydalanuvchi topilmadi');
       }
-      if(!entity.role.includes(Role.Admin)){
+      if(!entity.role.includes(Role.ADMIN)){
         throw new UnauthorizedException('Foydalanuvchi admin emas');
       }
 
