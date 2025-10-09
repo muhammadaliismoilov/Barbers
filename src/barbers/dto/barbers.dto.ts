@@ -77,7 +77,7 @@ export class CreateBarberDto {
   @Type(() => Number)
   @IsNumber()
   @IsOptional()
-  long?: number;
+  lng?: number;
 }
 
 export class UpdateBarberDto {
@@ -147,5 +147,5 @@ export class UpdateBarberDto {
   @Type(() => Number)
   @IsNumber()
   @IsOptional()
-  long?: number;
+  lng?: number;
 }
