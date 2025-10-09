@@ -24,14 +24,14 @@ import { JwtAuthGuard } from 'src/common/guard/jwt.aut.guard';
 import { Roles } from 'src/common/guard/roles.decarator';
 
 @ApiBearerAuth('JWT-auth')
-@ApiTags('barber_services')
+@ApiTags('Barber_services')
 @Controller('barber_services')
 // @UseGuards(JwtAuthGuard, RolesGuard) 
 export class BarberServicesController {
   constructor(private readonly barberServicesService: BarberServicesService) {}
 
   @Post()
-  // @Roles( 'barber', 'admin', 'superadmin')
+  // @Roles( 'admin', 'superadmin')
   @ApiOperation({ summary: 'Yangi xizmat qo‘shish' })
   @ApiResponse({ status: 201, description: 'Xizmat muvaffaqiyatli qo‘shildi'} )
   async create(@Body() dto: CreateBarberServiceDto) {

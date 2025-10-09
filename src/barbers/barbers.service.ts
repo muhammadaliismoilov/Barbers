@@ -52,24 +52,22 @@ export class BarbersService {
   }
 
   async findOne(barberId: string): Promise<Barber> {
-  try {
-    const barber = await this.barberRepository.findOne({
-      where: { id: barberId },
-      relations: ['servicesList','clients'], // shu yerda relationni chaqiramiz
-    });
-
-    if (!barber) throw new NotFoundException('Berilgan barber topilmadi');
-
-    return barber;
-  } catch (error) {
-    if (error instanceof NotFoundException) throw error;  
-    throw new InternalServerErrorException(
-      'Barberni olishda serverda xatolik yuz berdi',
-      error.message,
-    );
+    try {
+      const barber = await this.barberRepository.findOne({
+        where: { id: barberId },
+        // relations: ['servicesList ', 'clients'], // shu yerda relationni chaqiramiz
+        loadRelationIds: true,
+      });
+      if (!barber) throw new NotFoundException('Berilgan barber topilmadi');
+      return barber;
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException(
+        'Barberni olishda serverda xatolik yuz berdi',
+        error.message,
+      );
+    }
   }
-}
-
 
   async update(id: string, dto: UpdateBarberDto) {
     try {
@@ -77,16 +75,18 @@ export class BarbersService {
       if (!barber) {
         throw new NotFoundException(`Barber topilmadi (id: ${id})`);
       }
-  
+
       for (const [key, value] of Object.entries(dto)) {
         if (value !== undefined && value !== null && value !== '') {
           if (key === 'role') {
             // agar string bo‘lsa arrayga o‘ramiz
             const newRoles = Array.isArray(value) ? value : [value];
-  
+
             // eski ro‘llarni saqlab, yangilarni qo‘shamiz (dublikatlarni oldini olamiz)
-            const mergedRoles = Array.from(new Set([...(barber.role || []), ...newRoles]));
-  
+            const mergedRoles = Array.from(
+              new Set([...(barber.role || []), ...newRoles]),
+            );
+
             (barber as any)[key] = mergedRoles;
           } else {
             (barber as any)[key] = value;
@@ -95,7 +95,7 @@ export class BarbersService {
       }
       return await this.barberRepository.save(barber);
     } catch (error) {
-      if(error instanceof NotFoundException)throw error
+      if (error instanceof NotFoundException) throw error;
       throw new InternalServerErrorException(
         'Barberni yangilashda xatolik yuz berdi',
         error.message,
@@ -107,7 +107,7 @@ export class BarbersService {
     try {
       const barber = await this.findOne(id);
       if (!barber) throw new NotFoundException('Barber topilmadi');
-      await this.barberRepository.remove(barber);
+      await this.barberRepository.delete({ id });
       return { message: 'Barber o`chirildi' };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;

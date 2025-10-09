@@ -2,6 +2,7 @@
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from './roles.decarator';
+import { Role } from 'src/users/user.entity';
 
 
 @Injectable()
@@ -14,11 +15,15 @@ export class RolesGuard implements CanActivate {
       context.getClass(),
     ]);
     if (!roles) return true;
-
+    
     const { user } = context.switchToHttp().getRequest();
 
-    if (!user || !roles.includes(user.role)) {
-      throw new ForbiddenException('❌ Sizda bu amalni bajarishga ruxsat yo‘q');
+    if (!user || !roles.includes(user.role = Role.BARBER)) {
+      throw new ForbiddenException(`❌ Sizda bu amalni bajarishga ruxsat yo‘q sizning rolingiz:${user.role}`);
+    }
+
+    if (!user || !roles.includes(user.role = Role.ADMIN)) {
+      throw new ForbiddenException(`❌ Sizda bu amalni bajarishga ruxsat yo‘q sizning rolingiz:${user.role}`);
     }
 
     return true;

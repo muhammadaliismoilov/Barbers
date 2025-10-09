@@ -40,7 +40,7 @@ export class BarberServicesService {
       // Xizmat yaratish
       const service = this.barberServiceRepo.create({
         ...dto,
-        barber: barber, // barber obyektini bog‘lash
+        // barber: barber, // barber obyektini bog‘lash
       });
 
       return await this.barberServiceRepo.save(service);
@@ -123,6 +123,7 @@ export class BarberServicesService {
       await this.barberServiceRepo.remove(service);
       return { message: 'Xizmat muvaffaqiyatli o‘chirildi' };
     } catch (error) {
+      if (error instanceof NotFoundException) throw error;
       throw new InternalServerErrorException(
         'Xizmatni o‘chirishda serverda xatolik yuz berdi',
         error.message,
