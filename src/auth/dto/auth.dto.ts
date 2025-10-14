@@ -2,9 +2,11 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEnum,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsPhoneNumber,
   IsString,
+  Matches,
   MinLength,
 } from 'class-validator';
 import { Role } from 'src/users/user.entity';
@@ -19,11 +21,14 @@ export class RegisterDto {
   fullName: string;
 
   @ApiProperty({
-    example: '+998901234567',
-    description: 'Foydalanuvchining telefon raqami (unikal)',
+    example: '998901234567',
+    description: 'Foydalanuvchi telefon raqami (faqat raqamlar)',
   })
-  @IsPhoneNumber('UZ')
-  @IsString({})
+  @IsNotEmpty({ message: 'Telefon raqami kiritilishi kerak' })
+  @IsString({ message: 'Telefon raqami matn (string) bo‘lishi kerak' })
+  @Matches(/^[0-9]{9,15}$/, {
+    message: 'Telefon raqami faqat raqamlardan iborat bo‘lishi kerak (9–15 ta raqam)',
+  })
   phone: string;
 
   @ApiProperty({
@@ -37,8 +42,15 @@ export class RegisterDto {
 
 
 export class LoginDto {
-  @ApiProperty({ example: '+998901234567', description: 'Telefon raqami' })
-  @IsPhoneNumber('UZ', { message: 'Telefon raqami noto‘g‘ri formatda' })
+  @ApiProperty({
+    example: '998901234567',
+    description: 'Foydalanuvchi telefon raqami (faqat raqamlar)',
+  })
+  @IsNotEmpty({ message: 'Telefon raqami kiritilishi kerak' })
+  @IsString({ message: 'Telefon raqami matn (string) bo‘lishi kerak' })
+  @Matches(/^[0-9]{9,15}$/, {
+    message: 'Telefon raqami faqat raqamlardan iborat bo‘lishi kerak (9–15 ta raqam)',
+  })
   phone: string;
 
   @ApiProperty({ example: 'password123', description: 'Parol' })
@@ -49,8 +61,15 @@ export class LoginDto {
 }
 
 export class ChangePasswordDto {
-  @ApiProperty({ example: '+998901234567', description: 'Telefon raqami' })
-  @IsPhoneNumber('UZ', { message: 'Telefon raqami noto‘g‘ri formatda' })
+  @ApiProperty({
+    example: '998901234567',
+    description: 'Foydalanuvchi telefon raqami (faqat raqamlar)',
+  })
+  @IsNotEmpty({ message: 'Telefon raqami kiritilishi kerak' })
+  @IsString({ message: 'Telefon raqami matn (string) bo‘lishi kerak' })
+  @Matches(/^[0-9]{9,15}$/, {
+    message: 'Telefon raqami faqat raqamlardan iborat bo‘lishi kerak (9–15 ta raqam)',
+  })
   phone: string;
 
   @ApiProperty({ example: 'newPassword123', description: 'Yangi parol' })

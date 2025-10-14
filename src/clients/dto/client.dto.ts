@@ -11,7 +11,6 @@ import {
 } from 'class-validator';
 import { ClientStatus } from '../client.entity';
 
-
 export class UpdateClientStatusDto {
   @ApiProperty({
     example: ClientStatus.PROGRESS,
@@ -28,14 +27,18 @@ export class CreateClientDto {
   @ApiProperty({ example: 'Ali Valiyev', description: 'Mijozning to‘liq ismi' })
   @IsNotEmpty({ message: 'Ism bo‘sh bo‘lishi mumkin emas' })
   @IsString({ message: 'Ism faqat matn bo‘lishi kerak' })
-  name: string;
+  fullName: string;
 
   @ApiProperty({
-    example: '+998901234567',
-    description: 'Mijozning telefon raqami',
+    example: '998901234567',
+    description: 'Foydalanuvchi telefon raqami (faqat raqamlar)',
   })
   @IsNotEmpty({ message: 'Telefon raqami kiritilishi kerak' })
-  @IsPhoneNumber('UZ', { message: 'Telefon raqami noto‘g‘ri formatda' })
+  @IsString({ message: 'Telefon raqami matn (string) bo‘lishi kerak' })
+  @Matches(/^[0-9]{9,15}$/, {
+    message:
+      'Telefon raqami faqat raqamlardan iborat bo‘lishi kerak (9–15 ta raqam)',
+  })
   phone: string;
 
   @ApiProperty({
@@ -90,18 +93,22 @@ export class UpdateClientDto {
   })
   @IsOptional()
   @IsString({ message: 'Ism faqat matn bo‘lishi kerak' })
-  name?: string;
+  fullName?: string;
 
   @ApiProperty({
-    example: '+998901234567',
-    description: 'Mijozning telefon raqami',
-    required: false,
+    example: '998901234567',
+    description: 'Foydalanuvchi telefon raqami (faqat raqamlar)',
+  })
+  @IsNotEmpty({ message: 'Telefon raqami kiritilishi kerak' })
+  @IsString({ message: 'Telefon raqami matn (string) bo‘lishi kerak' })
+  @Matches(/^[0-9]{9,15}$/, {
+    message:
+      'Telefon raqami faqat raqamlardan iborat bo‘lishi kerak (9–15 ta raqam)',
   })
   @IsOptional()
-  @IsPhoneNumber('UZ', { message: 'Telefon raqami noto‘g‘ri formatda' })
   phone?: string;
-
-   @ApiProperty({
+  
+  @ApiProperty({
     example: '8f0e1c3a-9c2b-4d8f-bac0-15e29a6c6f2b',
     description: 'BarberID (UUID)',
   })

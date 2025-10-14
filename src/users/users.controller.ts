@@ -1,9 +1,9 @@
-import { Controller, Get, Param, Put, Delete, Body, Query } from '@nestjs/common';
+import { Controller, Get, Param, Put, Delete, Body, Query, Patch } from '@nestjs/common';
 import { UsersService } from './users.service';
 
-import { User } from './user.entity';
+import { Users } from './user.entity';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { NearbyBarbersDto, UpdateUserDto } from './dto/user.dto';
+import { NearbyBarbersDto, UpdateRoleDto, UpdateUserDto } from './dto/user.dto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -19,7 +19,7 @@ export class UsersController {
   @ApiResponse({
     status: 200,
     description: 'Yaqin atrofdagi sartaroshlar ro‘yxati muvaffaqiyatli qaytarildi.',
-    type: [User],
+    type: [Users],
   })
   @ApiResponse({
     status: 400,
@@ -31,7 +31,7 @@ export class UsersController {
   })
   async getNearbyBarbers(
     @Query() dto: NearbyBarbersDto,
-  ): Promise<User[]> {
+  ): Promise<Users[]> {
     return this.usersService.getBarbersNearby(dto);
   }
 
@@ -48,6 +48,24 @@ export class UsersController {
   async findOne(@Param('id') id: string) {
     return this.usersService.findOne(id);
   }
+
+
+  // 🧩 ROLE QO‘SHISH
+  @Patch('add-role')
+  @ApiOperation({ summary: 'Foydalanuvchiga yangi rol qo‘shish (masalan: admin, barber)' })
+  @ApiResponse({ status: 200, description: 'Rol muvaffaqiyatli qo‘shildi' })
+  async addRole(@Param('id') id :string, @Body()dto: UpdateRoleDto) {
+    return this.usersService.addRole(id,dto);
+  }
+
+  // 🧩 ROLE O‘CHIRISH
+  @Patch('remove-role')
+  @ApiOperation({ summary: 'Foydalanuvchidan rolni olib tashlash (masalan: admin yoki barber)' })
+  @ApiResponse({ status: 200, description: 'Rol muvaffaqiyatli o‘chirildi' })
+  async removeRole(@Param('id') id :string,@Body() dto: UpdateRoleDto) {
+    return this.usersService.removeRole(id,dto);
+  }
+
 
   @Put(':id')
   @ApiOperation({ summary: 'Foydalanuvchini yangilash' })
