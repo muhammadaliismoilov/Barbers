@@ -67,7 +67,6 @@ export class UsersService {
   async findAll() {
     try {
       return await this.userRepo.find({
-        // relations: ['barber'], // barber bilan join qilinadi
       });
     } catch (error) {
       console.log(error.message);
@@ -85,7 +84,8 @@ export class UsersService {
         where: { id },
         relations: ['userInfo'],
       });
-
+      console.log(user);
+      
       if (!user) {
         throw new NotFoundException(`Foydalanuvchi topilmadi (id: ${id})`);
       }

@@ -25,73 +25,73 @@ export class AuthController {
     return { xabar: 'Foydalanuvchi muvaffaqiyatli ro‘yxatdan o‘tdi', user };
   }
 
-  //TIZIMGA KIRISH ADMIN
-  //  @Post('login/admin')
-  // @ApiOperation({ summary: 'Tizimga kiritish ' })
-  // @ApiResponse({
-  //   status: 200,
-  //   description: 'Tizimga muvaffaqiyatli kirildi, tokenlar qaytarildi',
-  // })
-  // @ApiResponse({
-  //   status: 401,
-  //   description: 'Telefon raqam yoki parol noto‘g‘ri',
-  // })
-  // async loginAdmin(@Body() dto: LoginDto, @Res() res: Response) {
-  //   const result = await this.authService.loginAdmin(dto);
+  // TIZIMGA KIRISH ADMIN
+   @Post('login/admin')
+  @ApiOperation({ summary: 'Tizimga kiritish ' })
+  @ApiResponse({
+    status: 200,
+    description: 'Tizimga muvaffaqiyatli kirildi, tokenlar qaytarildi',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Telefon raqam yoki parol noto‘g‘ri',
+  })
+  async loginAdmin(@Body() dto: LoginDto, @Res() res: Response) {
+    const result = await this.authService.loginAdmin(dto);
 
-  //   res.cookie('access_token', result.accessToken, {
-  //     httpOnly: true, // JS orqali o‘qib bo‘lmaydi
-  //     secure: true, // faqat HTTPS’da ishlaydi
-  //     sameSite: 'strict',
-  //     maxAge: 1000 * 60 * 15, // 15 minut
-  //   });
+    res.cookie('access_token', result.accessToken, {
+      httpOnly: true, // JS orqali o‘qib bo‘lmaydi
+      secure: true, // faqat HTTPS’da ishlaydi
+      sameSite: 'strict',
+      maxAge: 1000 * 60 * 15, // 15 minut
+    });
 
-  //   res.cookie('refresh_token', result.refreshToken, {
-  //     httpOnly: true,
-  //     secure: true,
-  //     sameSite: 'strict',
-  //     maxAge: 1000 * 60 * 60 * 24 * 7, // 7 kun
-  //   });
-  //   return res.json({
-  //     xabar: 'Tizimga muvaffaqiyatli kirildi',
-  //     user: result, // foydalanuvchi haqida ma’lumot qaytarish mumkin
-  //   });
-  // }
+    res.cookie('refresh_token', result.refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 kun
+    });
+    return res.json({
+      xabar: 'Tizimga muvaffaqiyatli kirildi',
+      user: result, // foydalanuvchi haqida ma’lumot qaytarish mumkin
+    });
+  }
 
 
   // TIZIMGA KIRISH BARBER
-  //  @Post('login/barber')
-  // @ApiOperation({ summary: 'Tizimga kiritish ' })
-  // @ApiResponse({
-  //   status: 200,
-  //   description: 'Tizimga muvaffaqiyatli kirildi, tokenlar qaytarildi',
-  // })
-  // @ApiResponse({
-  //   status: 401,
-  //   description: 'Telefon raqam yoki parol noto‘g‘ri',
-  // })
-  // async loginBarber(@Body() dto: LoginDto, @Res() res: Response) {
-  //   const result = await this.authService.loginBarber(dto);
+   @Post('login/barber')
+  @ApiOperation({ summary: 'Tizimga kiritish ' })
+  @ApiResponse({
+    status: 200,
+    description: 'Tizimga muvaffaqiyatli kirildi, tokenlar qaytarildi',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Telefon raqam yoki parol noto‘g‘ri',
+  })
+  async loginBarber(@Body() dto: LoginDto, @Res() res: Response) {
+    const result = await this.authService.loginBarber(dto);
 
     
-  //   res.cookie('access_token', result.accessToken, {
-  //     httpOnly: true, // JS orqali o‘qib bo‘lmaydi
-  //     secure: true, // faqat HTTPS’da ishlaydi
-  //     sameSite: 'strict',
-  //     maxAge: 1000 * 60 * 15, // 15 minut
-  //   });
+    res.cookie('access_token', result.accessToken, {
+      httpOnly: true, // JS orqali o‘qib bo‘lmaydi
+      secure: true, // faqat HTTPS’da ishlaydi
+      sameSite: 'strict',
+      maxAge: 1000 * 60 * 15, // 15 minut
+    });
 
-  //   res.cookie('refresh_token', result.refreshToken, {
-  //     httpOnly: true,
-  //     secure: true,
-  //     sameSite: 'strict',
-  //     maxAge: 1000 * 60 * 60 * 24 * 7, // 7 kun
-  //   });
-  //   return res.json({
-  //     xabar: 'Tizimga muvaffaqiyatli kirildi',
-  //     user: result, // foydalanuvchi haqida ma’lumot qaytarish mumkin
-  //   });
-  // }
+    res.cookie('refresh_token', result.refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 kun
+    });
+    return res.json({
+      xabar: 'Tizimga muvaffaqiyatli kirildi',
+      user: result, // foydalanuvchi haqida ma’lumot qaytarish mumkin
+    });
+  }
 
 
   // TIZIMGA KIRISH USER
