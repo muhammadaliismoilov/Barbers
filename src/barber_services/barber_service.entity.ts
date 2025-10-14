@@ -7,21 +7,22 @@ import {
   UpdateDateColumn,
   JoinColumn,
 } from 'typeorm';
-import { Barber } from 'src/barbers/barber.entity';
+import { UsersInfo } from 'src/users_info/users_info.entity';
 
-@Entity('Barber_services')
-export class BarberService {
+
+@Entity('barber_services')
+export class BarberServices {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ name: 'barber_id' })
   barberId: string;
-  
-  @ManyToOne(() => Barber, (barber) => barber.servicesList, {
-    onDelete: 'CASCADE', 
+
+  @ManyToOne(() => UsersInfo, (barber) => barber.servicesList, {
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'barber_id' })
-  barber: Barber;
+  barber: UsersInfo;
 
   @Column({ type: 'varchar', length: 100, nullable: false })
   title: string; // xizmat nomi (masalan: "Soch olish")

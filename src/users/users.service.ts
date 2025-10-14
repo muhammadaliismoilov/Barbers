@@ -6,21 +6,63 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from './user.entity';
-import { NearbyBarbersDto, UpdateUserDto } from './dto/user.dto';
-import { Barber } from 'src/barbers/barber.entity';
-import { BarberService } from 'src/barber_services/barber_service.entity';
+import { Role, Users } from './user.entity';
+import { NearbyBarbersDto, UpdateRoleDto, UpdateUserDto } from './dto/user.dto';
+import { BarberServices } from 'src/barber_services/barber_service.entity';
+import { Client } from 'pg';
+import { CreateClientDto } from 'src/clients/dto/client.dto';
+import { UsersInfo } from 'src/users_info/users_info.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(User)
-    private readonly userRepo: Repository<User>,
-    @InjectRepository(Barber)
-    private readonly barberRepo: Repository<Barber>,
-    @InjectRepository(BarberService)
-    private readonly barberServiceRepo: Repository<BarberService>,
+    @InjectRepository(Users)
+    private readonly userRepo: Repository<Users>,
+    @InjectRepository(UsersInfo)
+    private readonly barberRepo: Repository<UsersInfo>,
+    @InjectRepository(BarberServices)
+    private readonly barberServiceRepo: Repository<BarberServices>,
   ) {}
+
+
+ async addRole(id:string,dto: UpdateRoleDto) {
+
+    const { role } = dto;
+
+    const user = await this.userRepo.findOne({where:{id} });
+    if (!user) throw new NotFoundException('Foydalanuvchi topilmadi');
+
+    // Agar userda rol allaqachon mavjud bo‘lsa
+    if (user.role.includes(role)) {
+      throw new BadRequestException(`Foydalanuvchida "${role}" roli allaqachon mavjud`);
+    }
+
+    user.role.push(role);
+    return this.userRepo.save(user);
+  }
+
+  // 🧩 ROLE O‘CHIRISH
+  async removeRole(id:string, dto: UpdateRoleDto) {
+    const {  role } = dto;
+
+    const user = await this.userRepo.findOne({ where: { id } });
+    if (!user) throw new NotFoundException('Foydalanuvchi topilmadi');
+
+    // Agar userda bunday rol bo‘lmasa
+    if (!user.role.includes(role)) {
+      throw new BadRequestException(`Foydalanuvchida "${role}" roli yo‘q`);
+    }
+
+    // Rolni olib tashlaymiz
+    user.role = user.role.filter((r) => r !== role);
+
+    // ⚠️ Hech bo‘lmaganda bitta rol qolishi kerak
+    if (user.role.length === 0) {
+      user.role = [Role.USER]; // default user rolini qoldiramiz
+    }
+
+    return this.userRepo.save(user);
+  }
 
   async findAll() {
     try {
@@ -41,7 +83,7 @@ export class UsersService {
     try {
       const user = await this.userRepo.findOne({
         where: { id },
-        relations: ['barber'],
+        relations: ['userInfo'],
       });
 
       if (!user) {
@@ -50,6 +92,8 @@ export class UsersService {
 
       return user;
     } catch (error) {
+      console.log(error);
+      
       throw new InternalServerErrorException(
         'Foydalanuvchini olishda xatolik yuz berdi',
         error.message,
@@ -126,27 +170,28 @@ export class UsersService {
       // Haversine formula (km)
       const distance = `ROUND(CAST(
          (6371 * acos(
-           cos(radians(:lat)) * cos(radians(barbers.lat)) *
-           cos(radians(barbers.lng) - radians(:lng)) +
-           sin(radians(:lat)) * sin(radians(barbers.lat))
+           cos(radians(:lat)) * cos(radians("u"."lat")) *
+           cos(radians("u"."lng") - radians(:lng)) +
+           sin(radians(:lat)) * sin(radians("u"."lat"))
          )) AS numeric ), 2 )`;
 
       // So‘rov
       const barbers = await this.barberRepo
         .createQueryBuilder('barbers')
+        .innerJoin('barbers.userId', 'u')
         .select([
-          'barbers.fullName AS name',
-          'barbers.phone AS phone',
-          'barbers.workHours AS workingHours',
-          'barbers.experienceYears AS experienceYears',
-          'barbers.description AS description',
-          'barbers.lat AS lat',
-          'barbers.lng AS lng',
-          'barbers.isActive AS isActive',
+          '"u"."fullName" AS name',
+          '"u"."phone" AS phone',
+          '"barbers"."workHours" AS workingHours',
+          '"barbers"."experienceYears" AS experienceYears',
+          '"barbers"."description" AS description',
+          '"u"."lat" AS lat',
+          '"u"."lng" AS lng',
+          '"barbers"."isActive" AS isActive',
         ])
         .addSelect(distance, 'distance')
         .where(`${distance} < :radius`, { lat, lng, radius: searchRadius })
-        .andWhere('barbers.isActive = :isActive', { isActive: true }) // ✅ to‘g‘rilandi
+        .andWhere('"barbers"."isActive" = :isActive', { isActive: true }) // ✅ to‘g‘rilandi
         .orderBy('distance', 'ASC')
         .getRawMany();
 
@@ -159,8 +204,9 @@ export class UsersService {
 
       return barbers;
     } catch (error) {
-      console.error('getBarbersNearby error:', error);
       if (error instanceof NotFoundException) throw error;
+      console.log(error);
+      
       throw new InternalServerErrorException(
         'Yaqin atrofdagi barberlarni olishda xatolik yuz berdi',
       );

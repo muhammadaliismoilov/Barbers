@@ -1,10 +1,11 @@
-import { Barber } from 'src/barbers/barber.entity';
+import { UsersInfo } from 'src/users_info/users_info.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToOne,
 } from 'typeorm';
 
 export enum Role {
@@ -15,7 +16,7 @@ export enum Role {
 }
 
 @Entity('users')
-export class User {
+export class Users {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -42,4 +43,11 @@ export class User {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+    @OneToOne(() => UsersInfo, (userInfo: UsersInfo) => userInfo.userId, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
+  userInfo: UsersInfo;
+
 }

@@ -9,8 +9,8 @@ import { BarberServicesModule } from './barber_services/barber_services.module';
 import { ReportsModule } from './reports/reports.module';
 import { ClientsModule } from './clients/clients.module';
 
-import { BarbersModule } from './barbers/barbers.module';
 import { QueuesModule } from './queues/queues.module';
+import { UsersInfoModule } from './users_info/users_info.module';
 
 
 @Module({
@@ -32,11 +32,12 @@ import { QueuesModule } from './queues/queues.module';
     }),
     AuthModule,
     UsersModule,
-       BarbersModule,
+    UsersInfoModule,
     BarberServicesModule,
     ClientsModule,
     ReportsModule,
     QueuesModule,
+    UsersInfoModule,
   ],
   controllers: [],
   providers: [],
