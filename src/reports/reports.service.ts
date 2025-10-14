@@ -1,17 +1,17 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
-import { Client, ClientStatus } from '../clients/client.entity';
-import { BarberService } from 'src/barber_services/barber_service.entity';
+import { Clients, ClientStatus } from '../clients/client.entity';
+import { BarberServices } from 'src/barber_services/barber_service.entity';
 import { ReportDto } from './dto/report.dto';
 
 @Injectable()
 export class ReportsService {
   constructor(
-    @InjectRepository(Client)
-    private clientRepo: Repository<Client>,
-    @InjectRepository(BarberService)
-    private barberServiceRepo: Repository<BarberService>,
+    @InjectRepository(Clients)
+    private clientRepo: Repository<Clients>,
+    @InjectRepository(BarberServices)
+    private barberServiceRepo: Repository<BarberServices>,
   ) {}
 async getDailyReport(date?: string): Promise<ReportDto> {
   try {

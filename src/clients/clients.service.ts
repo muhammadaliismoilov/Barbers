@@ -6,23 +6,23 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { BarberService } from 'src/barber_services/barber_service.entity';
+import { BarberServices } from 'src/barber_services/barber_service.entity';
 import { Repository } from 'typeorm';
-import { Client, ClientStatus } from './client.entity';
+import { Clients, ClientStatus } from './client.entity';
 import { CreateClientDto, UpdateClientDto } from './dto/client.dto';
-import { Barber } from 'src/barbers/barber.entity';
 import { BarberClientGateway } from 'src/webSocket/barber-client.gateway';
+import { UsersInfo } from 'src/users_info/users_info.entity';
 
 @Injectable()
 export class ClientsService {
   constructor(
-    @InjectRepository(Client)
-    private readonly clientRepo: Repository<Client>,
+    @InjectRepository(Clients)
+    private readonly clientRepo: Repository<Clients>,
     private readonly gateway: BarberClientGateway,
-    @InjectRepository(BarberService)
-    private readonly barberServiceRepo: Repository<BarberService>,
-    @InjectRepository(Barber)
-    private readonly barberRepo: Repository<Barber>,
+    @InjectRepository(BarberServices)
+    private readonly barberServiceRepo: Repository<BarberServices>,
+    @InjectRepository(UsersInfo)
+    private readonly barberRepo: Repository<UsersInfo>,
   ) {}
 
   async updateStatus(id: string, status: ClientStatus) {
@@ -112,7 +112,7 @@ export class ClientsService {
 
       // client yaratish
       const client = this.clientRepo.create({
-        name: dto.name,
+        fullName: dto.fullName,
         phone: dto.phone,
         appointmentDate: dto.appointmentDate,
         appointmentTime: dto.appointmentTime,

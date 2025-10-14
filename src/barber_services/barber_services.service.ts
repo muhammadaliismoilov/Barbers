@@ -6,24 +6,24 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { BarberService } from './barber_service.entity';
+import { BarberServices } from './barber_service.entity';
 import {
   CreateBarberServiceDto,
   UpdateBarberServiceDto,
 } from './dto/barber_service.dto';
-import { Barber } from 'src/barbers/barber.entity';
+import { UsersInfo } from 'src/users_info/users_info.entity';
 
 @Injectable()
 export class BarberServicesService {
   constructor(
-    @InjectRepository(BarberService)
-    private readonly barberServiceRepo: Repository<BarberService>,
-    @InjectRepository(Barber)
-    private readonly barberRepo: Repository<Barber>,
+    @InjectRepository(BarberServices)
+    private readonly barberServiceRepo: Repository<BarberServices>,
+    @InjectRepository(UsersInfo)
+    private readonly barberRepo: Repository<UsersInfo>,
   ) {}
 
   // ✅ CREATE
-  async create(dto: CreateBarberServiceDto): Promise<BarberService> {
+  async create(dto: CreateBarberServiceDto): Promise<BarberServices> {
     try {
       // Barberni tekshirish
       const barber = await this.barberRepo.findOne({
@@ -59,7 +59,7 @@ export class BarberServicesService {
   }
 
   // ✅ FIND ALL
-  async findAll(): Promise<BarberService[]> {
+  async findAll(): Promise<BarberServices[]> {
     try {
       return await this.barberServiceRepo.find({});
     } catch (error) {
@@ -71,7 +71,7 @@ export class BarberServicesService {
   }
 
   // ✅ FIND ONE
-  async findOne(id: string): Promise<BarberService> {
+  async findOne(id: string): Promise<BarberServices> {
     try {
       const service = await this.barberServiceRepo.findOne({
         where: { id },
@@ -94,7 +94,7 @@ export class BarberServicesService {
   async update(
     id: string,
     dto: UpdateBarberServiceDto,
-  ): Promise<BarberService> {
+  ): Promise<BarberServices> {
     try {
       const service = await this.findOne(id);
       if (!service)

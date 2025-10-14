@@ -2,6 +2,7 @@ import { Controller, Get, Param } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { QueuesService } from './queues.service';
 import { ClientQueueDto } from './dto/queues.dto';
+import { plainToInstance } from 'class-transformer';
 
 
 @ApiTags('Queues')
@@ -26,7 +27,13 @@ export class QueuesController {
 async getBarberQueues(
   @Param('barberId') barberId: string,
 ): Promise<ClientQueueDto[]> {
-  return this.queuesService.queues(barberId);
+
+  const data = await this.queuesService.queues(barberId);
+
+    // 🔥 Automatik DTO transformatsiya
+    return plainToInstance(ClientQueueDto, data, { excludeExtraneousValues: false });
+  }
+  // return this.queuesService.queues(barberId);
 }
 
-}
+

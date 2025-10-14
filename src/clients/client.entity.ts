@@ -1,5 +1,5 @@
-import { BarberService } from 'src/barber_services/barber_service.entity';
-import { Barber } from 'src/barbers/barber.entity';
+import { BarberServices } from 'src/barber_services/barber_service.entity';
+import { UsersInfo } from 'src/users_info/users_info.entity';
 import {
   Column,
   CreateDateColumn,
@@ -19,12 +19,12 @@ export enum ClientStatus {
 
 @Entity('clients')
 @Unique(['appointmentDate', 'appointmentTime', 'barberServiceId'])
-export class Client {
+export class Clients {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column()
-  name: string;
+  fullName: string;
 
   @Column()
   phone: string;
@@ -32,21 +32,21 @@ export class Client {
   @Column({ name: 'barber_id' })
   barberId: string;
 
-  @ManyToOne(() => Barber, (barber) => barber.clients, { onDelete: 'CASCADE' })
+  @ManyToOne(() => UsersInfo, (barber) => barber.clients, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'barber_id' })
-  barber: Barber;
+  barber: UsersInfo;
 
-  @Column({ name: 'barberService_id' })
+  @Column({ name: 'barber_service_id' })
   barberServiceId: string;
 
-  @ManyToOne(() => BarberService, (service) => service.id)
-  @JoinColumn({ name: 'barberService_id' })
-  barberService: BarberService;
+  @ManyToOne(() => BarberServices, (service) => service.id)
+  @JoinColumn({ name: 'barber_service_id' })
+  barberService: BarberServices;
 
-  @Column({ type: 'date' })
+  @Column({ type: 'date' ,name: 'appointment_date' })
   appointmentDate: string;
 
-  @Column({ type: 'time' })
+  @Column({ type: 'time' ,name: 'appointment_time' })
   appointmentTime: string;
 
   @Column({ nullable: true })
