@@ -56,9 +56,7 @@ export class AuthService {
         password: hashed,
         role: [Role.USER],
       });
-
-      const saved = await this.userRepo.save(user);
-
+      await this.userRepo.save(user);
       return user;
     } catch (error) {
       if (error instanceof ConflictException) throw error;
@@ -69,52 +67,52 @@ export class AuthService {
     }
   }
 
-    //LOGIN ADMIN
+    // LOGIN ADMIN
 
-  //   async loginAdmin(dto: LoginDto) {
-  //   try {
-  //     let entity : Users | null= null;
+    async loginAdmin(dto: LoginDto) {
+    try {
+      let entity : Users | null= null;
 
-  //     entity =await this.userRepo.findOne({where:{phone:dto.phone},select:['id', 'password','role']})
+      entity =await this.userRepo.findOne({where:{phone:dto.phone},select:['id', 'password','role']})
       
-  //     if(!entity){
-  //       entity =await this.barberRepo.findOne({where:{phone:dto.phone},select:['id', 'password','role']})
-  //     }
+      if(!entity){
+        entity =await this.userRepo.findOne({where:{phone:dto.phone},select:['id', 'password','role']})
+      }
 
-  //     if (!entity) {
-  //       throw new NotFoundException('Foydalanuvchi topilmadi');
-  //     }
-  //     if(!entity.role.includes(Role.ADMIN)){
-  //       throw new UnauthorizedException('Foydalanuvchi admin emas');
-  //     }
+      if (!entity) {
+        throw new NotFoundException('Foydalanuvchi topilmadi');
+      }
+      if(!entity.role.includes(Role.ADMIN)){
+        throw new UnauthorizedException('Foydalanuvchi admin emas');
+      }
 
-  //     const match = await bcrypt.compare(dto.password, entity.password);
-  //     if (!match) {
-  //       throw new UnauthorizedException('Parol noto‘g‘ri');
-  //     }
+      const match = await bcrypt.compare(dto.password, entity.password);
+      if (!match) {
+        throw new UnauthorizedException('Parol noto‘g‘ri');
+      }
 
-  //     // Tokenlar generatsiya qilish
-  //     const tokens = this.getTokens(entity);
+      // Tokenlar generatsiya qilish
+      const tokens = this.getTokens(entity);
 
 
-  //     return {
-  //       user: {
-  //         id: entity.id,
-  //         role: entity.role,
-  //       },
-  //       ...tokens,
-  //     };
-  //   } catch (error) {
-  //     if (error instanceof NotFoundException) throw error;
-  //     if (error instanceof UnauthorizedException) throw error;
-  //     console.log(error);
+      return {
+        user: {
+          id: entity.id,
+          role: entity.role,
+        },
+        ...tokens,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      if (error instanceof UnauthorizedException) throw error;
+      console.log(error);
       
-  //     throw new InternalServerErrorException(
-  //       'Login qilishda serverda xatolik yuz berdi',
-  //       error.message,
-  //     );
-  //   }
-  // }
+      throw new InternalServerErrorException(
+        'Login qilishda serverda xatolik yuz berdi',
+        error.message,
+      );
+    }
+  }
 
 
   //LOGIN USER
@@ -156,44 +154,45 @@ export class AuthService {
     }
   }
 
-  //  async loginBarber(dto: LoginDto) {
-  //   try {
-  //     const entity =await this.barberRepo.findOne({where:{phone:dto.phone},select:['id', 'password','role']})
+   async loginBarber(dto: LoginDto) {
+    try {
+      const entity =await this.userRepo.findOne({where:{phone:dto.phone},select:['id', 'password','role']})
+console.log(entity);
 
-  //     if (!entity) {
-  //       throw new NotFoundException('Foydalanuvchi topilmadi');
-  //     }
-  //     if(!entity.role.includes(Role.BARBER)){
-  //       throw new UnauthorizedException('Foydalanuvchi barber emas');
-  //     }
+      if (!entity) {
+        throw new NotFoundException('Foydalanuvchi topilmadi');
+      }
+      if(!entity.role.includes(Role.BARBER)){
+        throw new UnauthorizedException('Foydalanuvchi barber emas');
+      }
 
-  //     const match = await bcrypt.compare(dto.password, entity.password);
-  //     if (!match) {
-  //       throw new UnauthorizedException('Parol noto‘g‘ri');
-  //     }
+      const match = await bcrypt.compare(dto.password, entity.password);
+      if (!match) {
+        throw new UnauthorizedException('Parol noto‘g‘ri');
+      }
 
-  //     // Tokenlar generatsiya qilish
-  //     const tokens = this.getTokens(entity);
+      // Tokenlar generatsiya qilish
+      const tokens = this.getTokens(entity);
 
 
-  //     return {
-  //       user: {
-  //         id: entity.id,
-  //         role: entity.role,
-  //       },
-  //       ...tokens,
-  //     };
-  //   } catch (error) {
-  //     if (error instanceof NotFoundException) throw error;
-  //     if (error instanceof UnauthorizedException) throw error;
-  //     console.log(error);
+      return {
+        user: {
+          id: entity.id,
+          role: entity.role,
+        },
+        ...tokens,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      if (error instanceof UnauthorizedException) throw error;
+      console.log(error);
       
-  //     throw new InternalServerErrorException(
-  //       'Login qilishda serverda xatolik yuz berdi',
-  //       error.message,
-  //     );
-  //   }
-  // }
+      throw new InternalServerErrorException(
+        'Login qilishda serverda xatolik yuz berdi',
+        error.message,
+      );
+    }
+  }
 
   async changePassword(dto:ChangePasswordDto) {
     try {
