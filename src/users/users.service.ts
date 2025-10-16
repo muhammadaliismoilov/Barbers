@@ -69,7 +69,7 @@ export class UsersService {
       return await this.userRepo.find({
       });
     } catch (error) {
-      console.log(error.message);
+    
 
       throw new InternalServerErrorException(
         'Foydalanuvchilarni olishda xatolik yuz berdi',
@@ -84,7 +84,7 @@ export class UsersService {
         where: { id },
         relations: ['userInfo'],
       });
-      console.log(user);
+     
       
       if (!user) {
         throw new NotFoundException(`Foydalanuvchi topilmadi (id: ${id})`);
@@ -92,7 +92,7 @@ export class UsersService {
 
       return user;
     } catch (error) {
-      console.log(error);
+     
       
       throw new InternalServerErrorException(
         'Foydalanuvchini olishda xatolik yuz berdi',
@@ -205,7 +205,7 @@ export class UsersService {
       return barbers;
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      console.log(error);
+    
       
       throw new InternalServerErrorException(
         'Yaqin atrofdagi barberlarni olishda xatolik yuz berdi',
