@@ -43,7 +43,6 @@ async queues(barberId: string): Promise<ClientQueueDto[]> {
     return result
   } catch (error) {
     if(error instanceof NotFoundException) throw error
-    console.log(error);
     
     throw new InternalServerErrorException(
       'Barber navbatini olishda xatolik yuz berdi',
