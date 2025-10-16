@@ -4,6 +4,8 @@ import {
   InternalServerErrorException,
   UnauthorizedException,
   NotFoundException,
+  ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role, Users } from 'src/users/user.entity';
@@ -11,8 +13,6 @@ import { Repository } from 'typeorm';
 import { RegisterDto, LoginDto, ChangePasswordDto } from './dto/auth.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-
-
 
 @Injectable()
 export class AuthService {
@@ -23,18 +23,23 @@ export class AuthService {
   ) {}
 
   // Helper: tokenlar yaratish
-  private getTokens(user: Users ) {
-    const payload = { sub: user.id, phone: user.phone, role: user.role };
+  private async getTokens(user: Users) {
+    const payload = {
+      sub: user.id,
+      phone: user.phone,
+      role: user.role,
+    };
 
-    const accessToken = this.jwtService.sign(payload, {
-      secret: process.env.JWT_SECRET || 'access_secret',
-      expiresIn: '15m',
-    });
-
-    const refreshToken = this.jwtService.sign(payload, {
-      secret: process.env.JWT_REFRESH_SECRET || 'refresh_secret',
-      expiresIn: '7d',
-    });
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(payload, {
+        secret: process.env.JWT_SECRET || 'access_secret',
+        expiresIn: '15m',
+      }),
+      this.jwtService.signAsync(payload, {
+        secret: process.env.JWT_REFRESH_SECRET || 'refresh_secret',
+        expiresIn: '7d',
+      }),
+    ]);
 
     return { accessToken, refreshToken };
   }
@@ -67,126 +72,129 @@ export class AuthService {
     }
   }
 
-    // LOGIN ADMIN
+  // LOGIN ADMIN
 
-    async loginAdmin(dto: LoginDto) {
+  async loginAdmin(dto: LoginDto) {
     try {
-      let entity : Users | null= null;
+      const user = await this.userRepo.findOne({
+        where: { phone: dto.phone },
+        select: ['id', 'password', 'role', 'phone'],
+      });
 
-      entity =await this.userRepo.findOne({where:{phone:dto.phone},select:['id', 'password','role']})
-      
-      if(!entity){
-        entity =await this.userRepo.findOne({where:{phone:dto.phone},select:['id', 'password','role']})
-      }
-
-      if (!entity) {
+      if (!user) {
         throw new NotFoundException('Foydalanuvchi topilmadi');
       }
-      if(!entity.role.includes(Role.ADMIN)){
+      if (!user.role.includes(Role.ADMIN)) {
         throw new UnauthorizedException('Foydalanuvchi admin emas');
       }
 
-      const match = await bcrypt.compare(dto.password, entity.password);
+      const match = await bcrypt.compare(dto.password, user.password);
       if (!match) {
         throw new UnauthorizedException('Parol noto‘g‘ri');
       }
 
       // Tokenlar generatsiya qilish
-      const tokens = this.getTokens(entity);
+      const tokens = await this.getTokens(user);
 
+      // 🔒 Refresh tokenni DB’da hashlab saqlaymiz
+      const hashedRefreshToken = await bcrypt.hash(tokens.refreshToken, 10);
+      await this.userRepo.update(user.id, { hashedRefreshToken });
 
       return {
-        user: {
-          id: entity.id,
-          role: entity.role,
-        },
-        ...tokens,
+        id: user.id,
+        role: user.role,
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
       };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
       if (error instanceof UnauthorizedException) throw error;
-      console.log(error);
-      
+
       throw new InternalServerErrorException(
         'Login qilishda serverda xatolik yuz berdi',
         error.message,
       );
     }
   }
-
 
   //LOGIN USER
 
   async login(dto: LoginDto) {
     try {
+      const user = await this.userRepo.findOne({
+        where: { phone: dto.phone },
+        select: ['id', 'password', 'role', 'phone'], // phone ham kerak payload uchun
+      });
 
-      const entity =await this.userRepo.findOne({where:{phone:dto.phone},select:['id', 'password','role']})
-
-      if (!entity) {
+      if (!user) {
         throw new NotFoundException('Foydalanuvchi topilmadi');
       }
 
-      const match = await bcrypt.compare(dto.password, entity.password);
-      if (!match) {
+      const isPasswordValid = await bcrypt.compare(dto.password, user.password);
+      if (!isPasswordValid) {
         throw new UnauthorizedException('Parol noto‘g‘ri');
       }
 
-      // Tokenlar generatsiya qilish
-      const tokens = this.getTokens(entity);
+      // 🔐 Tokenlar generatsiya qilish
+      const tokens = await this.getTokens(user);
 
+      // 🔒 Refresh tokenni DB’da hashlab saqlaymiz
+      const hashedRefreshToken = await bcrypt.hash(tokens.refreshToken, 10);
+      await this.userRepo.update(user.id, { hashedRefreshToken });
 
       return {
-        user: {
-          id: entity.id,
-          role: entity.role,
-        },
-        ...tokens,
+        id: user.id,
+        role: user.role,
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
       };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
       if (error instanceof UnauthorizedException) throw error;
-      console.log(error);
-      
+
+      console.error('Login error:', error);
+
       throw new InternalServerErrorException(
         'Login qilishda serverda xatolik yuz berdi',
-        error.message,
       );
     }
   }
 
-   async loginBarber(dto: LoginDto) {
+  async loginBarber(dto: LoginDto) {
     try {
-      const entity =await this.userRepo.findOne({where:{phone:dto.phone},select:['id', 'password','role']})
-console.log(entity);
+      const user = await this.userRepo.findOne({
+        where: { phone: dto.phone },
+        select: ['id', 'password', 'role', 'phone'],
+      });
 
-      if (!entity) {
+      if (!user) {
         throw new NotFoundException('Foydalanuvchi topilmadi');
       }
-      if(!entity.role.includes(Role.BARBER)){
+      if (!user.role.includes(Role.BARBER)) {
         throw new UnauthorizedException('Foydalanuvchi barber emas');
       }
 
-      const match = await bcrypt.compare(dto.password, entity.password);
+      const match = await bcrypt.compare(dto.password, user.password);
       if (!match) {
         throw new UnauthorizedException('Parol noto‘g‘ri');
       }
 
-      // Tokenlar generatsiya qilish
-      const tokens = this.getTokens(entity);
+      // 🔐 Tokenlar generatsiya qilish
+      const tokens = await this.getTokens(user);
 
+      // 🔒 Refresh tokenni DB’da hashlab saqlaymiz
+      const hashedRefreshToken = await bcrypt.hash(tokens.refreshToken, 10);
+      await this.userRepo.update(user.id, { hashedRefreshToken });
 
       return {
-        user: {
-          id: entity.id,
-          role: entity.role,
-        },
-        ...tokens,
+        id: user.id,
+        role: user.role,
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
       };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
       if (error instanceof UnauthorizedException) throw error;
-      console.log(error);
-      
       throw new InternalServerErrorException(
         'Login qilishda serverda xatolik yuz berdi',
         error.message,
@@ -194,14 +202,14 @@ console.log(entity);
     }
   }
 
-  async changePassword(dto:ChangePasswordDto) {
+  async changePassword(dto: ChangePasswordDto) {
     try {
-      const user = await this.userRepo.findOne({ where: { phone:dto.phone } });
+      const user = await this.userRepo.findOne({ where: { phone: dto.phone } });
       if (!user) throw new NotFoundException('Foydalanuvchi topilmadi');
       const hashed = await bcrypt.hash(dto.newPassword, 10);
-      await this.userRepo.update({ phone:dto.phone }, { password: hashed });
+      await this.userRepo.update({ phone: dto.phone }, { password: hashed });
     } catch (error) {
-      if(error instanceof NotFoundException) throw error
+      if (error instanceof NotFoundException) throw error;
       throw new InternalServerErrorException(
         'Parolni o‘zgartirishda serverda xatolik yuz berdi',
         error.message,
@@ -209,10 +217,67 @@ console.log(entity);
     }
   }
 
-  async logOut(){
-    return {message: "Foydalanuvchi muvaffaqiyatli tizimdan chiqdi"}
+  // async logout(userId: string) {
+  //   // use undefined to satisfy TypeORM partial update typing
+  //   await this.userRepo.update(userId, { hashedRefreshToken: undefined });
+  //   return { message: 'Foydalanuvchi tizimdan chiqdi' };
+  // }
+
+  async logout(userId: string) {
+  try {
+    if (!userId) {
+      throw new BadRequestException('Foydalanuvchi identifikatori talab qilinadi');
+    }
+
+    const result = await this.userRepo.update(
+      { id: userId },
+      { hashedRefreshToken: null }, // ✅ haqiqiy null qiymat
+    );
+
+    if (!result.affected || result.affected === 0) {
+      throw new NotFoundException('Foydalanuvchi topilmadi');
+    }
+
+    return { message: 'Foydalanuvchi tizimdan muvaffaqiyatli chiqdi' };
+
+  } catch (error) {
+    if (error instanceof BadRequestException) throw error;
+    if (error instanceof NotFoundException) throw error;
+
+    throw new InternalServerErrorException(
+      'Tizimdan chiqishda serverda xatolik yuz berdi',
+    );
   }
+}
 
 
+  async refreshTokens(userId: string, refreshToken: string) {
+    try {
+      const user = await this.userRepo.findOne({ where: { id: userId } });
+    
+      if (!user?.hashedRefreshToken)
+        throw new UnauthorizedException('Foydalanuvchi tizimdan chiqqan');
 
+      const isMatch = await bcrypt.compare(
+        refreshToken,
+        user.hashedRefreshToken,
+      );
+      if (!isMatch) throw new UnauthorizedException('Refresh token noto‘g‘ri');
+
+      const tokens = await this.getTokens(user);
+      const hashedRefreshToken = await bcrypt.hash(tokens.refreshToken, 10);
+      await this.userRepo.update(user.id, { hashedRefreshToken });
+
+      return tokens;
+    } catch (error) {
+      if (error instanceof ForbiddenException) throw error;
+      if (error instanceof UnauthorizedException) throw error;
+      throw (
+        new InternalServerErrorException(
+          'Refresh token yangilashda serverda xatolik yuz berdi ',
+        ),
+        error.message
+      );
+    }
+  }
 }

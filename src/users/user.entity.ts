@@ -50,4 +50,7 @@ export class Users {
   })
   userInfo: UsersInfo;
 
+  @Column({ type: 'text', nullable: true })
+  hashedRefreshToken?: string | null;
+
 }

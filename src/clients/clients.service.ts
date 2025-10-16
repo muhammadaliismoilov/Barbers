@@ -130,8 +130,6 @@ export class ClientsService {
       if (error instanceof NotFoundException) throw error;
       if (error instanceof ConflictException) throw error;
       if (error instanceof BadRequestException) throw error;
-      console.log(error.message);
-
       throw new InternalServerErrorException(
         'Mijoz qo‘shishda serverda xatolik yuz berdi',
       );
