@@ -236,7 +236,7 @@ export class AuthController {
 
   // TIZIMGA KIRISH ADMIN
   @Post('login/admin')
-  @ApiOperation({ summary: 'Tizimga kiritish' })
+  @ApiOperation({ summary: 'Tizimga kiritish Admin' })
   @ApiResponse({
     status: 200,
     description: 'Tizimga muvaffaqiyatli kirildi, tokenlar qaytarildi',
@@ -272,7 +272,7 @@ export class AuthController {
 
   // TIZIMGA KIRISH BARBER
   @Post('login/barber')
-  @ApiOperation({ summary: 'Tizimga kiritish' })
+  @ApiOperation({ summary: 'Tizimga kiritish Barber' })
   @ApiResponse({
     status: 200,
     description: 'Tizimga muvaffaqiyatli kirildi, tokenlar qaytarildi',
@@ -308,7 +308,7 @@ export class AuthController {
 
   // TIZIMGA KIRISH USER
   @Post('login/user')
-  @ApiOperation({ summary: 'Tizimga kiritish' })
+  @ApiOperation({ summary: 'Tizimga kiritish User' })
   @ApiResponse({
     status: 200,
     description: 'Tizimga muvaffaqiyatli kirildi, tokenlar qaytarildi',
