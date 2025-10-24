@@ -30,9 +30,9 @@ export class Users {
   password: string;
 
   @Column({ type: 'enum', enum: Role, array: true, default: [Role.USER] })
-  role: Role[];
+  role: string[];
 
-   @Column({ type: 'float', nullable: true })
+  @Column({ type: 'float', nullable: true })
   lat: number;
 
   @Column({ type: 'float', nullable: true })

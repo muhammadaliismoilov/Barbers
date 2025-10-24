@@ -51,15 +51,15 @@ export class UsersController {
 
 
   // 🧩 ROLE QO‘SHISH
-  @Patch('add-role')
+  @Patch(':id/add-role')
   @ApiOperation({ summary: 'Foydalanuvchiga yangi rol qo‘shish (masalan: admin, barber)' })
   @ApiResponse({ status: 200, description: 'Rol muvaffaqiyatli qo‘shildi' })
-  async addRole(@Param('id') id :string, @Body()dto: UpdateRoleDto) {
+  async addRole(@Param('id') id:string, @Body()dto: UpdateRoleDto) {
     return this.usersService.addRole(id,dto);
   }
 
   // 🧩 ROLE O‘CHIRISH
-  @Patch('remove-role')
+  @Patch(':id/remove-role')
   @ApiOperation({ summary: 'Foydalanuvchidan rolni olib tashlash (masalan: admin yoki barber)' })
   @ApiResponse({ status: 200, description: 'Rol muvaffaqiyatli o‘chirildi' })
   async removeRole(@Param('id') id :string,@Body() dto: UpdateRoleDto) {

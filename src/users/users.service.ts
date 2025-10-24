@@ -5,12 +5,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { Role, Users } from './user.entity';
 import { NearbyBarbersDto, UpdateRoleDto, UpdateUserDto } from './dto/user.dto';
 import { BarberServices } from 'src/barber_services/barber_service.entity';
-import { Client } from 'pg';
-import { CreateClientDto } from 'src/clients/dto/client.dto';
 import { UsersInfo } from 'src/users_info/users_info.entity';
 
 @Injectable()
@@ -24,53 +22,10 @@ export class UsersService {
     private readonly barberServiceRepo: Repository<BarberServices>,
   ) {}
 
-
- async addRole(id:string,dto: UpdateRoleDto) {
-
-    const { role } = dto;
-
-    const user = await this.userRepo.findOne({where:{id} });
-    if (!user) throw new NotFoundException('Foydalanuvchi topilmadi');
-
-    // Agar userda rol allaqachon mavjud bo‘lsa
-    if (user.role.includes(role)) {
-      throw new BadRequestException(`Foydalanuvchida "${role}" roli allaqachon mavjud`);
-    }
-
-    user.role.push(role);
-    return this.userRepo.save(user);
-  }
-
-  // 🧩 ROLE O‘CHIRISH
-  async removeRole(id:string, dto: UpdateRoleDto) {
-    const {  role } = dto;
-
-    const user = await this.userRepo.findOne({ where: { id } });
-    if (!user) throw new NotFoundException('Foydalanuvchi topilmadi');
-
-    // Agar userda bunday rol bo‘lmasa
-    if (!user.role.includes(role)) {
-      throw new BadRequestException(`Foydalanuvchida "${role}" roli yo‘q`);
-    }
-
-    // Rolni olib tashlaymiz
-    user.role = user.role.filter((r) => r !== role);
-
-    // ⚠️ Hech bo‘lmaganda bitta rol qolishi kerak
-    if (user.role.length === 0) {
-      user.role = [Role.USER]; // default user rolini qoldiramiz
-    }
-
-    return this.userRepo.save(user);
-  }
-
   async findAll() {
     try {
-      return await this.userRepo.find({
-      });
+      return await this.userRepo.find({});
     } catch (error) {
-    
-
       throw new InternalServerErrorException(
         'Foydalanuvchilarni olishda xatolik yuz berdi',
         error.message,
@@ -84,16 +39,13 @@ export class UsersService {
         where: { id },
         relations: ['userInfo'],
       });
-     
-      
+
       if (!user) {
         throw new NotFoundException(`Foydalanuvchi topilmadi (id: ${id})`);
       }
 
       return user;
     } catch (error) {
-     
-      
       throw new InternalServerErrorException(
         'Foydalanuvchini olishda xatolik yuz berdi',
         error.message,
@@ -205,10 +157,63 @@ export class UsersService {
       return barbers;
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-    
-      
+
       throw new InternalServerErrorException(
         'Yaqin atrofdagi barberlarni olishda xatolik yuz berdi',
+      );
+    }
+  }
+
+  async addRole(id: string, dto: UpdateRoleDto) {
+    try {
+      const { role } = dto;
+
+      const user = await this.userRepo.findOne({ where: { id } });
+      if (!user) throw new NotFoundException('Foydalanuvchi topilmadi');
+      // Agar userda rol allaqachon mavjud bo‘lsa
+      if (user.role.includes(role)) {
+        throw new BadRequestException(
+          `Foydalanuvchida "${role}" roli allaqachon mavjud`,
+        );
+      }
+
+      user.role.push(role);
+      return this.userRepo.save(user);
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException(
+        'Ro`l qoshishda serverda xatolik yuz  berdi',
+        error.message,
+      );
+    }
+  }
+  // 🧩 ROLE O‘CHIRISH
+  async removeRole(id: string, dto: UpdateRoleDto) {
+    try {
+      const { role } = dto;
+
+      const user = await this.userRepo.findOne({ where: { id } });
+      if (!user) throw new NotFoundException('Foydalanuvchi topilmadi');
+
+      // Agar userda bunday rol bo‘lmasa
+      if (!user.role.includes(role)) {
+        throw new BadRequestException(`Foydalanuvchida "${role}" roli yo‘q`);
+      }
+
+      // Rolni olib tashlaymiz
+      user.role = user.role.filter((r) => r !== role);
+
+      // ⚠️ Hech bo‘lmaganda bitta rol qolishi kerak
+      if (user.role.length === 0) {
+        user.role = [Role.USER]; // default user rolini qoldiramiz
+      }
+
+      return this.userRepo.save(user);
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException(
+        'Ro`lni olib tashlashda  serverda xatolik yuz  berdi',
+        error.message,
       );
     }
   }
