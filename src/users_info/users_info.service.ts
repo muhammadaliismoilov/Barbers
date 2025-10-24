@@ -49,12 +49,16 @@ async findAll() {
 
   // 🧩 FIND ONE
   async findOne(id: string) {
-    const info = await this.usersInfoRepo.findOne({
+    try {
+      const info = await this.usersInfoRepo.findOne({
       where: { id },
-      relations: ['userId'],
+      relations: ['userId'], select: { userId: { id: true } },
     });
     if (!info) throw new NotFoundException('User ma’lumoti topilmadi');
     return info;
+    } catch (error) {
+      throw new InternalServerErrorException("Bitta barber malumotlarini olishda serverda xatolik yu berdi")
+    }
   }
 
   // 🧩 UPDATE
