@@ -55,6 +55,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { TransformInterceptor } from './common/interseptors/transform.interceptor';
+import { ErrorInterceptor } from './common/interseptors/error.interseptor';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -75,6 +77,11 @@ async function bootstrap() {
       forbidNonWhitelisted: true, // qo‘shimcha field kelsa error beradi
       transform: true,
     }),
+  );
+    app.useGlobalInterceptors(
+    // new LoggingInterceptor(),
+    new TransformInterceptor(),
+    new ErrorInterceptor(),
   );
   const config = new DocumentBuilder()
     .setTitle('Barbers API') 

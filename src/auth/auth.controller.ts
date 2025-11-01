@@ -321,7 +321,7 @@ export class AuthController {
     @Body() dto: LoginDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const user = await this.authService.login(dto);
+    const user = await this.authService.loginUser(dto);
 
     const isProd = process.env.NODE_ENV === 'production';
     const sameSite = isProd ? 'none' : 'strict'; // cross-site in prod requires 'none' + secure:true

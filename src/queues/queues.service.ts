@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { HttpException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BarberServices } from 'src/barber_services/barber_service.entity';
 import { Clients } from 'src/clients/client.entity';
@@ -42,11 +42,10 @@ async queues(barberId: string): Promise<ClientQueueDto[]> {
       .getRawMany();
     return result
   } catch (error) {
-    if(error instanceof NotFoundException) throw error
+    if(error instanceof HttpException) throw error
     
     throw new InternalServerErrorException(
       'Barber navbatini olishda xatolik yuz berdi',
-      error.message,
     );
   }
 }

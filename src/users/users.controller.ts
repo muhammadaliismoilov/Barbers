@@ -1,9 +1,10 @@
-import { Controller, Get, Param, Put, Delete, Body, Query, Patch } from '@nestjs/common';
+import { Controller, Get, Param, Put, Delete, Body, Query, Patch, UseInterceptors } from '@nestjs/common';
 import { UsersService } from './users.service';
 
 import { Users } from './user.entity';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { NearbyBarbersDto, UpdateRoleDto, UpdateUserDto } from './dto/user.dto';
+import { TransformInterceptor } from 'src/common/interseptors/transform.interceptor';
 
 @ApiTags('Users')
 @Controller('users')
@@ -36,6 +37,7 @@ export class UsersController {
   }
 
   @Get()
+  // @UseInterceptors(TransformInterceptor)
   @ApiOperation({ summary: 'Barcha foydalanuvchilarni olish' })
   @ApiResponse({ status: 200, description: 'Foydalanuvchilar ro‘yxati'})
   async findAll() {
@@ -43,6 +45,7 @@ export class UsersController {
   }
 
   @Get(':id')
+    // @UseInterceptors(TransformInterceptor)
   @ApiOperation({ summary: 'Bitta foydalanuvchini olish' })
   @ApiResponse({ status: 200, description: 'Topilgan foydalanuvchi' })
   async findOne(@Param('id') id: string) {

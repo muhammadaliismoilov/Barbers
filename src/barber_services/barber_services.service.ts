@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  HttpException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -45,15 +46,9 @@ export class BarberServicesService {
 
       return await this.barberServiceRepo.save(service);
     } catch (error) {
-      if (
-        error instanceof ConflictException ||
-        error instanceof NotFoundException
-      )
-        throw error;
-
+        if (error instanceof HttpException) throw error;
       throw new InternalServerErrorException(
         'Xizmat qo‘shishda serverda xatolik yuz berdi',
-        error.message,
       );
     }
   }
@@ -63,9 +58,10 @@ export class BarberServicesService {
     try {
       return await this.barberServiceRepo.find({});
     } catch (error) {
+         if (error instanceof HttpException) throw error;
       throw new InternalServerErrorException(
         'Xizmatlarni olishda xatolik yuz berdi',
-        error.message,
+     
       );
     }
   }
@@ -82,10 +78,10 @@ export class BarberServicesService {
       }
       return service;
     } catch (error) {
-      if (error instanceof NotFoundException) throw error;
+         if (error instanceof HttpException) throw error;
       throw new InternalServerErrorException(
         'Xizmatni olishda serverda xatolik yuz berdi',
-        error.message,
+
       );
     }
   }
@@ -106,10 +102,10 @@ export class BarberServicesService {
       }
       return await this.barberServiceRepo.save(service);
     } catch (error) {
-      if (error instanceof NotFoundException) throw error;
+      if (error instanceof HttpException) throw error;
       throw new InternalServerErrorException(
         'Xizmatni yangilashda serverda xatolik yuz berdi',
-        error.message,
+       
       );
     }
   }
@@ -123,10 +119,10 @@ export class BarberServicesService {
       await this.barberServiceRepo.remove(service);
       return { message: 'Xizmat muvaffaqiyatli o‘chirildi' };
     } catch (error) {
-      if (error instanceof NotFoundException) throw error;
+   if (error instanceof HttpException) throw error;
       throw new InternalServerErrorException(
         'Xizmatni o‘chirishda serverda xatolik yuz berdi',
-        error.message,
+       
       );
     }
   }
