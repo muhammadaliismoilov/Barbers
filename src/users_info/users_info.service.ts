@@ -1,4 +1,9 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  HttpException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -18,62 +23,93 @@ export class UsersInfoService {
 
   // 🧩 CREATE
   async create(dto: CreateUsersInfoDto) {
-    const user = await this.usersRepo.findOne({ where: { id: dto.userId } });
-    if (!user) throw new NotFoundException('Bunday user topilmadi');
+    try {
+      const user = await this.usersRepo.findOne({ where: { id: dto.userId } });
+      if (!user) throw new NotFoundException('Bunday user topilmadi');
 
-    const newInfo = this.usersInfoRepo.create({
-      ...dto,
-      userId: user,
-    });
+      const newInfo = this.usersInfoRepo.create({
+        ...dto,
+        userId: user,
+      });
 
-    return this.usersInfoRepo.save(newInfo);
+      return this.usersInfoRepo.save(newInfo);
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      throw new InternalServerErrorException(
+        'Barber qo`shishda serverda xatolik yuz berdi',
+      );
+    }
   }
 
   // 🧩 FIND ALL
-async findAll() {
- try {
-   const data = await this.usersInfoRepo.find({
-    relations: ['userId'],
-    order: { createdAt: 'DESC' },
-  });
+  async findAll() {
+    try {
+      const data = await this.usersInfoRepo.find({
+        relations: ['userId'],
+        order: { createdAt: 'DESC' },
+      });
 
-  return data.map(item => ({
-    ...item,
-    userId: item.userId?.id, // faqat id qiymatini olamiz
-  }));
- } catch (error) {
-  throw new InternalServerErrorException('Barcha barrberlar ma`lumotlarini olishda serverda xtolik yuz berdi'),error.message
- }
-}
-
+      return data.map((item) => ({
+        ...item,
+        userId: item.userId?.id, // faqat id qiymatini olamiz
+      }));
+    } catch (error) {
+        if (error instanceof HttpException) throw error; 
+      throw (
+        new InternalServerErrorException(
+          'Barcha barrberlar ma`lumotlarini olishda serverda xtolik yuz berdi',
+        )
+      );
+    }
+  }
 
   // 🧩 FIND ONE
   async findOne(id: string) {
     try {
       const info = await this.usersInfoRepo.findOne({
-      where: { id },
-      relations: ['userId'], select: { userId: { id: true } },
-    });
-    if (!info) throw new NotFoundException('User ma’lumoti topilmadi');
-    return info;
+        where: { id },
+        relations: ['userId'],
+        select: { userId: { id: true } },
+      });
+      if (!info) throw new NotFoundException('User ma’lumoti topilmadi');
+      return info;
     } catch (error) {
-      throw new InternalServerErrorException("Bitta barber malumotlarini olishda serverda xatolik yu berdi")
+        if (error instanceof HttpException) throw error; 
+      throw new InternalServerErrorException(
+        'Bitta barber malumotlarini olishda serverda xatolik yuz berdi',
+      );
     }
   }
 
   // 🧩 UPDATE
   async update(id: string, dto: UpdateUsersInfoDto) {
-    const info = await this.usersInfoRepo.findOne({ where: { id } });
-    if (!info) throw new NotFoundException('Yangilanish uchun ma’lumot topilmadi');
+    try {
+      const info = await this.usersInfoRepo.findOne({ where: { id } });
+    if (!info)
+      throw new NotFoundException('Yangilanish uchun ma’lumot topilmadi');
 
     Object.assign(info, dto);
     return this.usersInfoRepo.save(info);
+    } catch (error) {
+       if (error instanceof HttpException) throw error; 
+      throw new InternalServerErrorException(
+        'Malumotlarni yangilashda serverda xatolik yuz berdi',
+      );
+    }
   }
 
   // 🧩 DELETE
   async remove(id: string) {
-    const info = await this.usersInfoRepo.findOne({ where: { id } });
-    if (!info) throw new NotFoundException('O‘chirish uchun ma’lumot topilmadi');
+    try {
+      const info = await this.usersInfoRepo.findOne({ where: { id } });
+    if (!info)
+      throw new NotFoundException('O‘chirish uchun ma’lumot topilmadi');
     return this.usersInfoRepo.remove(info);
+    } catch (error) {
+       if (error instanceof HttpException) throw error; 
+      throw new InternalServerErrorException(
+        'Malumotni o`chirishda serverda xatolik yuz berdi',
+      );
+    }
   }
 }

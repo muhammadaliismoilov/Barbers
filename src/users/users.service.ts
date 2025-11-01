@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  HttpException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -10,6 +11,7 @@ import { Role, Users } from './user.entity';
 import { NearbyBarbersDto, UpdateRoleDto, UpdateUserDto } from './dto/user.dto';
 import { BarberServices } from 'src/barber_services/barber_service.entity';
 import { UsersInfo } from 'src/users_info/users_info.entity';
+import { userInfo } from 'os';
 
 @Injectable()
 export class UsersService {
@@ -26,9 +28,10 @@ export class UsersService {
     try {
       return await this.userRepo.find({});
     } catch (error) {
+            if (error instanceof HttpException) throw error; 
       throw new InternalServerErrorException(
         'Foydalanuvchilarni olishda xatolik yuz berdi',
-        error.message,
+       
       );
     }
   }
@@ -46,9 +49,10 @@ export class UsersService {
 
       return user;
     } catch (error) {
+      if (error instanceof HttpException) throw error; 
       throw new InternalServerErrorException(
         'Foydalanuvchini olishda xatolik yuz berdi',
-        error.message,
+       
       );
     }
   }
@@ -80,10 +84,10 @@ export class UsersService {
 
       return await this.userRepo.save(user);
     } catch (error) {
-      if (error instanceof NotFoundException) throw error;
+        if (error instanceof HttpException) throw error; 
       throw new InternalServerErrorException(
         'Foydalanuvchini yangilashda xatolik yuz berdi',
-        error.message,
+       
       );
     }
   }
@@ -98,9 +102,10 @@ export class UsersService {
       await this.userRepo.remove(user);
       return { message: `Foydalanuvchi muvaffaqiyatli o‘chirildi (id: ${id})` };
     } catch (error) {
+      if(error instanceof HttpException) throw error
       throw new InternalServerErrorException(
         'Foydalanuvchini o‘chirishda xatolik yuz berdi',
-        error.message,
+       
       );
     }
   }
@@ -156,8 +161,7 @@ export class UsersService {
 
       return barbers;
     } catch (error) {
-      if (error instanceof NotFoundException) throw error;
-
+     if (error instanceof HttpException) throw error; 
       throw new InternalServerErrorException(
         'Yaqin atrofdagi barberlarni olishda xatolik yuz berdi',
       );
@@ -180,10 +184,10 @@ export class UsersService {
       user.role.push(role);
       return this.userRepo.save(user);
     } catch (error) {
-      if (error instanceof NotFoundException) throw error;
+  if (error instanceof HttpException) throw error; 
       throw new InternalServerErrorException(
         'Ro`l qoshishda serverda xatolik yuz  berdi',
-        error.message,
+       
       );
     }
   }
@@ -207,13 +211,12 @@ export class UsersService {
       if (user.role.length === 0) {
         user.role = [Role.USER]; // default user rolini qoldiramiz
       }
-
       return this.userRepo.save(user);
     } catch (error) {
-      if (error instanceof NotFoundException) throw error;
+if (error instanceof HttpException) throw error; 
       throw new InternalServerErrorException(
         'Ro`lni olib tashlashda  serverda xatolik yuz  berdi',
-        error.message,
+       
       );
     }
   }

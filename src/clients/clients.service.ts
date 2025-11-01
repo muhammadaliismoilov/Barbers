@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  HttpException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -127,9 +128,7 @@ export class ClientsService {
 
       return await this.clientRepo.save(client);
     } catch (error) {
-      if (error instanceof NotFoundException) throw error;
-      if (error instanceof ConflictException) throw error;
-      if (error instanceof BadRequestException) throw error;
+      if (error instanceof HttpException) throw error;
       throw new InternalServerErrorException(
         'Mijoz qo‘shishda serverda xatolik yuz berdi',
       );
@@ -140,6 +139,7 @@ export class ClientsService {
     try {
       return await this.clientRepo.find({});
     } catch (error) {
+         if (error instanceof HttpException) throw error;
       throw new InternalServerErrorException(
         'Mijozlarni olishda serverda xatolik yuz berdi',
       );
@@ -159,7 +159,7 @@ export class ClientsService {
 
       return client;
     } catch (error) {
-      if (error instanceof NotFoundException) throw error;
+   if (error instanceof HttpException) throw error;
       throw new InternalServerErrorException(
         'Mijozni olishda serverda xatolik yuz berdi',
       );
@@ -196,7 +196,7 @@ export class ClientsService {
 
       return await this.clientRepo.save(client);
     } catch (error) {
-      if (error instanceof NotFoundException) throw error;
+   if (error instanceof HttpException) throw error;
       throw new InternalServerErrorException(
         'Mijozni yangilashda serverda xatolik yuz berdi',
       );
@@ -213,7 +213,7 @@ export class ClientsService {
       await this.clientRepo.remove(client);
       return { message: 'Mijoz muvaffaqiyatli o‘chirildi' };
     } catch (error) {
-      if (error instanceof NotFoundException) throw error;
+      if (error instanceof HttpException) throw error;
       throw new InternalServerErrorException(
         'Mijozni o‘chirishda serverda xatolik yuz berdi',
       );

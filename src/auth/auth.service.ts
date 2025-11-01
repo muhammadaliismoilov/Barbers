@@ -6,6 +6,7 @@ import {
   NotFoundException,
   ForbiddenException,
   BadRequestException,
+  HttpException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role, Users } from 'src/users/user.entity';
@@ -64,10 +65,9 @@ export class AuthService {
       await this.userRepo.save(user);
       return user;
     } catch (error) {
-      if (error instanceof ConflictException) throw error;
+      if (error instanceof HttpException) throw error;
       throw new InternalServerErrorException(
         'Ro‘yxatdan o‘tishda serverda xatolik yuz berdi',
-        error.message,
       );
     }
   }
@@ -107,19 +107,16 @@ export class AuthService {
         refreshToken: tokens.refreshToken,
       };
     } catch (error) {
-      if (error instanceof NotFoundException) throw error;
-      if (error instanceof UnauthorizedException) throw error;
-
+      if (error instanceof HttpException) throw error;
       throw new InternalServerErrorException(
         'Login qilishda serverda xatolik yuz berdi',
-        error.message,
       );
     }
   }
 
   //LOGIN USER
 
-  async login(dto: LoginDto) {
+  async loginUser(dto: LoginDto) {
     try {
       const user = await this.userRepo.findOne({
         where: { phone: dto.phone },
@@ -149,11 +146,7 @@ export class AuthService {
         refreshToken: tokens.refreshToken,
       };
     } catch (error) {
-      if (error instanceof NotFoundException) throw error;
-      if (error instanceof UnauthorizedException) throw error;
-
-      console.error('Login error:', error);
-
+      if (error instanceof HttpException) throw error;
       throw new InternalServerErrorException(
         'Login qilishda serverda xatolik yuz berdi',
       );
@@ -193,11 +186,9 @@ export class AuthService {
         refreshToken: tokens.refreshToken,
       };
     } catch (error) {
-      if (error instanceof NotFoundException) throw error;
-      if (error instanceof UnauthorizedException) throw error;
+      if (error instanceof HttpException) throw error;
       throw new InternalServerErrorException(
         'Login qilishda serverda xatolik yuz berdi',
-        error.message,
       );
     }
   }
@@ -224,37 +215,35 @@ export class AuthService {
   // }
 
   async logout(userId: string) {
-  try {
-    if (!userId) {
-      throw new BadRequestException('Foydalanuvchi identifikatori talab qilinadi');
+    try {
+      if (!userId) {
+        throw new BadRequestException(
+          'Foydalanuvchi identifikatori talab qilinadi',
+        );
+      }
+
+      const result = await this.userRepo.update(
+        { id: userId },
+        { hashedRefreshToken: null }, // ✅ haqiqiy null qiymat
+      );
+
+      if (!result.affected || result.affected === 0) {
+        throw new NotFoundException('Foydalanuvchi topilmadi');
+      }
+
+      return { message: 'Foydalanuvchi tizimdan muvaffaqiyatli chiqdi' };
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      throw new InternalServerErrorException(
+        'Tizimdan chiqishda serverda xatolik yuz berdi',
+      );
     }
-
-    const result = await this.userRepo.update(
-      { id: userId },
-      { hashedRefreshToken: null }, // ✅ haqiqiy null qiymat
-    );
-
-    if (!result.affected || result.affected === 0) {
-      throw new NotFoundException('Foydalanuvchi topilmadi');
-    }
-
-    return { message: 'Foydalanuvchi tizimdan muvaffaqiyatli chiqdi' };
-
-  } catch (error) {
-    if (error instanceof BadRequestException) throw error;
-    if (error instanceof NotFoundException) throw error;
-
-    throw new InternalServerErrorException(
-      'Tizimdan chiqishda serverda xatolik yuz berdi',
-    );
   }
-}
-
 
   async refreshTokens(userId: string, refreshToken: string) {
     try {
       const user = await this.userRepo.findOne({ where: { id: userId } });
-    
+
       if (!user?.hashedRefreshToken)
         throw new UnauthorizedException('Foydalanuvchi tizimdan chiqqan');
 
@@ -270,13 +259,9 @@ export class AuthService {
 
       return tokens;
     } catch (error) {
-      if (error instanceof ForbiddenException) throw error;
-      if (error instanceof UnauthorizedException) throw error;
-      throw (
-        new InternalServerErrorException(
-          'Refresh token yangilashda serverda xatolik yuz berdi ',
-        ),
-        error.message
+      if (error instanceof HttpException) throw error;
+      throw new InternalServerErrorException(
+        'Refresh token yangilashda serverda xatolik yuz berdi ',
       );
     }
   }
