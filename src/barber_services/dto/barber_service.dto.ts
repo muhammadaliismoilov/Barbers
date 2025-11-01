@@ -7,6 +7,7 @@ import {
   MaxLength,
   Min,
   IsOptional,
+  IsUUID,
 } from 'class-validator';
 
 // 📝 Create DTO
@@ -14,7 +15,7 @@ export class CreateBarberServiceDto {
 
   @ApiProperty({ example: 'b1a6c4e3-9d49-4d3c-9d23-fb1c1e61e1c4', description: 'Barber ID' })
   @IsNotEmpty({ message: 'Barber ID bo‘sh bo‘lmasligi kerak' })
-  @IsString()
+  @IsUUID()
   barberId: string;
 
   @ApiProperty({
@@ -48,7 +49,7 @@ export class UpdateBarberServiceDto extends PartialType(CreateBarberServiceDto) 
 
   @ApiProperty({ example: 'b1a6c4e3-9d49-4d3c-9d23-fb1c1e61e1c4', description: 'Barber ID',required:false })
   @IsOptional()
-  @IsString( { message: 'Barber ID noto‘g‘ri formatda' })
+ @IsUUID()
   barberId?: string;
 
   @ApiProperty({
@@ -59,7 +60,7 @@ export class UpdateBarberServiceDto extends PartialType(CreateBarberServiceDto) 
   @IsOptional()
   @IsString()
   @MaxLength(100)
-  title?: string;
+  title?: string; 
 
   @ApiProperty({
     example: 70000.0,

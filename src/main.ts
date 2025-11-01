@@ -48,7 +48,6 @@
 // }
 // bootstrap();
 
-
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -60,16 +59,16 @@ import { ErrorInterceptor } from './common/interseptors/error.interseptor';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  
+
   app.enableCors({
     origin: process.env.FRONTEND_URL || 'http://localhost:3000',
     credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     allowedHeaders: 'Content-Type, Authorization',
   });
-  
+
   app.use(cookieParser());
-  
+
   app.set('trust proxy', 1);
   app.useGlobalPipes(
     new ValidationPipe({
@@ -78,13 +77,9 @@ async function bootstrap() {
       transform: true,
     }),
   );
-    app.useGlobalInterceptors(
-    // new LoggingInterceptor(),
-    new TransformInterceptor(),
-    new ErrorInterceptor(),
-  );
+  app.useGlobalInterceptors(new TransformInterceptor(), new ErrorInterceptor());
   const config = new DocumentBuilder()
-    .setTitle('Barbers API') 
+    .setTitle('Barbers API')
     .setDescription('Barbers project API documentation')
     .setVersion('1.0')
     .addBearerAuth(
@@ -117,4 +112,3 @@ async function bootstrap() {
   });
 }
 bootstrap();
-

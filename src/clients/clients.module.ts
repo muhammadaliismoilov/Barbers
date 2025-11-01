@@ -8,11 +8,17 @@ import { ClientsController } from './clients.controller';
 import { ClientsService } from './clients.service';
 import { BarberClientGateway } from 'src/webSocket/barber-client.gateway';
 import { UsersInfo } from 'src/users_info/users_info.entity';
+import { BullModule } from '@nestjs/bull';
+import { ClientsProcessor } from './clients.processor';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Clients, BarberServices, Users, UsersInfo])],
+  imports: [ BullModule.registerQueue({
+      name: 'clients', // navbat nomi
+    }),
+    TypeOrmModule.forFeature([Clients, BarberServices, Users, UsersInfo])
+  ],
   controllers: [ClientsController],
-  providers: [ClientsService, BarberClientGateway], // gateway shu yerda provid qilingan
+  providers: [ClientsService, BarberClientGateway,ClientsProcessor], // gateway shu yerda provid qilingan
   exports: [ClientsService, BarberClientGateway], // agar boshqa modul gateway'ni ishlatsa eksport qiling
 })
 export class ClientsModule {}

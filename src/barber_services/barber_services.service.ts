@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  HttpException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -45,15 +46,11 @@ export class BarberServicesService {
 
       return await this.barberServiceRepo.save(service);
     } catch (error) {
-      if (
-        error instanceof ConflictException ||
-        error instanceof NotFoundException
-      )
-        throw error;
+      if (error instanceof HttpException) throw error;
 
       throw new InternalServerErrorException(
         'Xizmat qo‘shishda serverda xatolik yuz berdi',
-        error.message,
+        // error.message,
       );
     }
   }

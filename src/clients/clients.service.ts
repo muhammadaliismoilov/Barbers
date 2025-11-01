@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  HttpException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -12,6 +13,8 @@ import { Clients, ClientStatus } from './client.entity';
 import { CreateClientDto, UpdateClientDto } from './dto/client.dto';
 import { BarberClientGateway } from 'src/webSocket/barber-client.gateway';
 import { UsersInfo } from 'src/users_info/users_info.entity';
+import { InjectQueue } from '@nestjs/bull';
+import type { Queue } from 'bull';
 
 @Injectable()
 export class ClientsService {
@@ -23,6 +26,7 @@ export class ClientsService {
     private readonly barberServiceRepo: Repository<BarberServices>,
     @InjectRepository(UsersInfo)
     private readonly barberRepo: Repository<UsersInfo>,
+      @InjectQueue('clients') private readonly clientsQueue: Queue,
   ) {}
 
   async updateStatus(id: string, status: ClientStatus) {
@@ -54,87 +58,106 @@ export class ClientsService {
 
   async create(dto: CreateClientDto) {
     try {
-      // barber service mavjudligini tekshirish
-      const barber = await this.barberRepo.findOne({
-        where: { id: dto.barberId },
-      });
-      if (!barber) throw new NotFoundException('Barber topilmadi');
+     const job = await this.clientsQueue.add('create-client', dto, {
+      // attempts: 1, // xato bo‘lsa qayta urinishlar 
+      // backoff: 5000, // 5s kutish
+      removeOnComplete: true,
+    });
 
-      const barberService = await this.barberServiceRepo.findOne({
-        where: { id: dto.barberServiceId },
-      });
+    const result = await job.finished(); // <— bu job tugaguncha kutadi
 
-      if (!barberService)
-        throw new NotFoundException(
-          `Xizmat turi topilmadi (id: ${dto.barberServiceId})`,
-        );
-
-      function isValidDate(dateString: string): boolean {
-        const date = new Date(dateString);
-        if (isNaN(date.getTime())) return false;
-
-        const [y, m, d] = dateString.split('-').map(Number);
-        return (
-          date.getUTCFullYear() === y &&
-          date.getUTCMonth() + 1 === m &&
-          date.getUTCDate() === d
-        );
-      }
-
-      function isValidTime(timeString: string): boolean {
-        const [hh, mm] = timeString.split(':').map(Number);
-        if (isNaN(hh) || isNaN(mm)) return false;
-
-        return hh >= 0 && hh < 24 && mm >= 0 && mm < 60;
-      }
-      if (!isValidDate(dto.appointmentDate))
-        throw new BadRequestException(
-          'appointmentDate noto‘g‘ri sana kiritildi!',
-        );
-      if (!isValidTime(dto.appointmentTime))
-        throw new BadRequestException(
-          'appointmentTime noto‘g‘ri vaqt kiritildi!',
-        );
-
-      // 🔎 Sana + vaqt bo‘yicha mavjudligini tekshirish
-      const exists = await this.clientRepo.findOne({
-        where: {
-          appointmentDate: dto.appointmentDate,
-          appointmentTime: dto.appointmentTime,
-        },
-      });
-
-      if (exists) {
-        throw new ConflictException(
-          `Bu vaqt (${dto.appointmentDate} ${dto.appointmentTime}) allaqachon band qilingan!`,
-        );
-      }
-
-      // client yaratish
-      const client = this.clientRepo.create({
-        fullName: dto.fullName,
-        phone: dto.phone,
-        appointmentDate: dto.appointmentDate,
-        appointmentTime: dto.appointmentTime,
-        description: dto.description,
-        barberId: dto.barberId,
-        barberServiceId: dto.barberServiceId,
-        // barber: barber,
-        // barberService: barberService,
-      });
-
-      this.gateway.clientAdded(client);
-
-      return await this.clientRepo.save(client);
+    return { message: 'Mijoz muvaffaqiyatli qo‘shildi ✅', data: result };
     } catch (error) {
-      if (error instanceof NotFoundException) throw error;
-      if (error instanceof ConflictException) throw error;
-      if (error instanceof BadRequestException) throw error;
-      throw new InternalServerErrorException(
-        'Mijoz qo‘shishda serverda xatolik yuz berdi',
-      );
+   if (error?.isCustom) {
+      throw new HttpException(error.message, error.status);
+    }
+      throw new InternalServerErrorException('Navbatga qo‘shishda xatolik');
     }
   }
+
+  // async create(dto: CreateClientDto) {
+  //   try {
+  //     // barber service mavjudligini tekshirish
+  //     const barber = await this.barberRepo.findOne({
+  //       where: { id: dto.barberId },
+  //     });
+  //     if (!barber) throw new NotFoundException('Barber topilmadi');
+
+  //     const barberService = await this.barberServiceRepo.findOne({
+  //       where: { id: dto.barberServiceId },
+  //     });
+
+  //     if (!barberService)
+  //       throw new NotFoundException(
+  //         `Xizmat turi topilmadi (id: ${dto.barberServiceId})`,
+  //       );
+
+  //     function isValidDate(dateString: string): boolean {
+  //       const date = new Date(dateString);
+  //       if (isNaN(date.getTime())) return false;
+
+  //       const [y, m, d] = dateString.split('-').map(Number);
+  //       return (
+  //         date.getUTCFullYear() === y &&
+  //         date.getUTCMonth() + 1 === m &&
+  //         date.getUTCDate() === d
+  //       );
+  //     }
+
+  //     function isValidTime(timeString: string): boolean {
+  //       const [hh, mm] = timeString.split(':').map(Number);
+  //       if (isNaN(hh) || isNaN(mm)) return false;
+
+  //       return hh >= 0 && hh < 24 && mm >= 0 && mm < 60;
+  //     }
+  //     if (!isValidDate(dto.appointmentDate))
+  //       throw new BadRequestException(
+  //         'AppointmentDate noto‘g‘ri sana kiritildi!',
+  //       );
+  //     if (!isValidTime(dto.appointmentTime))
+  //       throw new BadRequestException(
+  //         'AppointmentTime noto‘g‘ri vaqt kiritildi!',
+  //       );
+
+  //     // 🔎 Sana + vaqt bo‘yicha mavjudligini tekshirish
+  //     const exists = await this.clientRepo.findOne({
+  //       where: {
+  //         appointmentDate: dto.appointmentDate,
+  //         appointmentTime: dto.appointmentTime,
+  //       },
+  //     });
+
+  //     if (exists) {
+  //       throw new ConflictException(
+  //         `Bu vaqt (${dto.appointmentDate} ${dto.appointmentTime}) allaqachon band qilingan!`,
+  //       );
+  //     }
+
+  //     // client yaratish
+  //     const client = this.clientRepo.create({
+  //       fullName: dto.fullName,
+  //       phone: dto.phone,
+  //       appointmentDate: dto.appointmentDate,
+  //       appointmentTime: dto.appointmentTime,
+  //       description: dto.description,
+  //       barberId: dto.barberId,
+  //       barberServiceId: dto.barberServiceId,
+  //       // barber: barber,
+  //       // barberService: barberService,
+  //     });
+
+  //     this.gateway.clientAdded(client);
+
+  //     return await this.clientRepo.save(client);
+  //   } catch (error) {
+  //     // if (error instanceof HTTP) throw error;
+  //     // if (error instanceof ConflictException) throw error;
+  //     // if (error instanceof BadRequestException) throw error;
+  //     throw new InternalServerErrorException(
+  //       'Mijoz qo‘shishda serverda xatolik yuz berdi',
+  //     );
+  //   }
+  // }
 
   async findAll() {
     try {

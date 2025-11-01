@@ -42,7 +42,7 @@ async findAll() {
     userId: item.userId?.id, // faqat id qiymatini olamiz
   }));
  } catch (error) {
-  throw new InternalServerErrorException('Barcha barrberlar ma`lumotlarini olishda serverda xtolik yuz berdi'),error.message
+  throw new InternalServerErrorException('Barcha barrberlar ma`lumotlarini olishda serverda xtolik yuz berdi')
  }
 }
 

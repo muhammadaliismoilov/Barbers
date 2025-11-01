@@ -46,7 +46,8 @@ export class CreateClientDto {
     description: 'BarberID (UUID)',
   })
   @IsNotEmpty({ message: 'BarberID kiritilishi kerak' })
-  @IsUUID('4', { message: 'BarberID noto‘g‘ri formatda' })
+  @IsString()
+  // @IsUUID('4', { message: 'BarberID noto‘g‘ri formatda' })
   barberId: string;
 
   @ApiProperty({
@@ -54,7 +55,8 @@ export class CreateClientDto {
     description: 'Barber xizmati ID (UUID)',
   })
   @IsNotEmpty({ message: 'Barber xizmati ID kiritilishi kerak' })
-  @IsUUID('4', { message: 'Barber xizmati ID noto‘g‘ri formatda' })
+  @IsString()
+  // @IsUUID('4', { message: 'Barber xizmati ID noto‘g‘ri formatda' })
   barberServiceId: string;
 
   @ApiProperty({
@@ -113,7 +115,8 @@ export class UpdateClientDto {
     description: 'BarberID (UUID)',
   })
   @IsOptional()
-  @IsUUID('4', { message: 'BarberID noto‘g‘ri formatda' })
+  @IsString()
+  // @IsUUID('4', { message: 'BarberID noto‘g‘ri formatda' })
   barberId?: string;
 
   @ApiProperty({
@@ -122,7 +125,8 @@ export class UpdateClientDto {
     required: false,
   })
   @IsOptional()
-  @IsUUID('4', { message: 'Barber xizmati ID noto‘g‘ri formatda' })
+  @IsString()
+  // @IsUUID('4', { message: 'Barber xizmati ID noto‘g‘ri formatda' })
   barberService?: string;
 
   @ApiProperty({
