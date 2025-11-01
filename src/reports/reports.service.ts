@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { HttpException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
 import { Clients, ClientStatus } from '../clients/client.entity';
@@ -89,9 +89,9 @@ async getDailyReport(date?: string): Promise<ReportDto> {
       hoursBy,
     };
   } catch (error) {
+    if(error instanceof HttpException) throw error
     throw new InternalServerErrorException(
       'Xisobotlarni olishda serverda xatolik yuz berdi',
-      error.message,
     );
   }
 }

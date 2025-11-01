@@ -28,9 +28,10 @@ export class UsersService {
     try {
       return await this.userRepo.find({});
     } catch (error) {
+            if (error instanceof HttpException) throw error; 
       throw new InternalServerErrorException(
         'Foydalanuvchilarni olishda xatolik yuz berdi',
-        // error.message
+       
       );
     }
   }
@@ -51,7 +52,7 @@ export class UsersService {
       if (error instanceof HttpException) throw error; 
       throw new InternalServerErrorException(
         'Foydalanuvchini olishda xatolik yuz berdi',
-        // error.message,
+       
       );
     }
   }
@@ -86,7 +87,7 @@ export class UsersService {
         if (error instanceof HttpException) throw error; 
       throw new InternalServerErrorException(
         'Foydalanuvchini yangilashda xatolik yuz berdi',
-        // error.message,
+       
       );
     }
   }
@@ -101,9 +102,10 @@ export class UsersService {
       await this.userRepo.remove(user);
       return { message: `Foydalanuvchi muvaffaqiyatli o‘chirildi (id: ${id})` };
     } catch (error) {
+      if(error instanceof HttpException) throw error
       throw new InternalServerErrorException(
         'Foydalanuvchini o‘chirishda xatolik yuz berdi',
-        // error.message,
+       
       );
     }
   }
@@ -185,7 +187,7 @@ export class UsersService {
   if (error instanceof HttpException) throw error; 
       throw new InternalServerErrorException(
         'Ro`l qoshishda serverda xatolik yuz  berdi',
-        // error.message,
+       
       );
     }
   }
@@ -214,7 +216,7 @@ export class UsersService {
 if (error instanceof HttpException) throw error; 
       throw new InternalServerErrorException(
         'Ro`lni olib tashlashda  serverda xatolik yuz  berdi',
-        // error.message,
+       
       );
     }
   }
