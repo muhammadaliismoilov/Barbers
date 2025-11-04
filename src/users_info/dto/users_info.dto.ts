@@ -13,7 +13,8 @@ import {
 export class CreateUsersInfoDto {
   @ApiProperty({
     example: 'b6c7e8d2-31a1-4e91-9c41-5aaf5f6b1203',
-    description: 'Foydalanuvchining (user) ID raqami — bu user jadvalidan olinadi',
+    description:
+      'Foydalanuvchining (user) ID raqami — bu user jadvalidan olinadi',
   })
   @IsUUID('4', { message: 'userId UUID formatida bo‘lishi kerak' })
   userId: string;
@@ -44,6 +45,15 @@ export class CreateUsersInfoDto {
   workHours?: string;
 
   @ApiProperty({
+    example: '13:00 - 14:00',
+    description: 'Tanaffus vaqti (masalan: "13:00 - 14:00")',
+  })
+  @IsOptional()
+  @IsString({ message: 'lunchBreak faqat string matn bo‘lishi kerak' })
+  @MaxLength(50, { message: 'lunchBreak 50 belgidan oshmasligi kerak' })
+  lunchBreak?: string;
+
+  @ApiProperty({
     example: true,
     description: 'Barber faol yoki yo‘qligi (true — faol, false — faol emas)',
   })
@@ -51,16 +61,15 @@ export class CreateUsersInfoDto {
   isActive: boolean;
 }
 
-
-
 // 🧩 UPDATE DTO
 export class UpdateUsersInfoDto {
- @ApiProperty({
+  @ApiProperty({
     example: 'b6c7e8d2-31a1-4e91-9c41-5aaf5f6b1203',
-    description: 'Foydalanuvchining (user) ID raqami — bu user jadvalidan olinadi',
+    description:
+      'Foydalanuvchining (user) ID raqami — bu user jadvalidan olinadi',
   })
   @IsUUID('4', { message: 'userId UUID formatida bo‘lishi kerak' })
-    @IsOptional()
+  @IsOptional()
   userId?: string;
 
   @ApiProperty({
@@ -91,6 +100,16 @@ export class UpdateUsersInfoDto {
   @IsString({ message: 'workHours faqat string matn bo‘lishi kerak' })
   @MaxLength(100, { message: 'workHours 100 belgidan oshmasligi kerak' })
   workHours?: string;
+
+  @ApiProperty({
+    example: '13:00 - 14:00',
+    description: 'Tanaffus vaqti (masalan: "13:00 - 14:00")',
+    required: false,
+  })
+  @IsOptional()
+  @IsString({ message: 'lunchBreak faqat string matn bo‘lishi kerak' })
+  @MaxLength(50, { message: 'lunchBreak 50 belgidan oshmasligi kerak' })
+  lunchBreak?: string;
 
   @ApiProperty({
     example: false,
