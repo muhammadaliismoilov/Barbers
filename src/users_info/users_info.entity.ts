@@ -33,6 +33,12 @@ export class UsersInfo {
   @Column({ type: 'varchar', length: 100, nullable: true })
   workHours: string; // Masalan: "09:00 - 20:00"
 
+  @Column({type:'varchar',length:50, nullable:true})
+  lunchBreak:string  //masalan:"13:00-14:00"
+
+  @Column({type:'float', default:0})
+  rating:number;
+
   @Column({ type: 'boolean', default: true })
   isActive: boolean;
 
