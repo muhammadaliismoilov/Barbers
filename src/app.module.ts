@@ -11,6 +11,7 @@ import { ClientsModule } from './clients/clients.module';
 
 import { QueuesModule } from './queues/queues.module';
 import { UsersInfoModule } from './users_info/users_info.module';
+import { BackupModule } from './backup/backup.module';
 
 
 @Module({
@@ -38,6 +39,7 @@ import { UsersInfoModule } from './users_info/users_info.module';
     ReportsModule,
     QueuesModule,
     UsersInfoModule,
+    BackupModule
   ],
   controllers: [],
   providers: [],

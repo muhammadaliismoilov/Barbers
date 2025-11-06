@@ -114,6 +114,8 @@ async function bootstrap() {
   await app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Server is running on http://localhost:${PORT}`);
     console.log(`📖 Swagger docs: http://localhost:${PORT}/api/docs`);
+    console.log('Backup ishladi');
+    
   });
 }
 bootstrap();
